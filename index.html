@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoofSig QA Checklist | WF-01</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #111111;
+      --bg-card: #1a1a1a;
+      --border: #2a2a2a;
+      --text-primary: #00ff88;
+      --text-secondary: #888888;
+      --text-bright: #ffffff;
+      --accent: #00ff88;
+      --warning: #ffaa00;
+      --error: #ff4444;
+      --success: #00ff88;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      border: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      background: var(--bg-secondary);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 2px;
+    }
+
+    .logo span {
+      color: var(--text-secondary);
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .meta {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .meta-item::before {
+      content: ">";
+      color: var(--accent);
+    }
+
+    section {
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      background: var(--bg-card);
+    }
+
+    .section-header {
+      background: var(--bg-secondary);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .section-count {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 1rem 0;
+    }
+
+    .checklist-item {
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .checkbox:hover {
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .checkbox.checked {
+      background: var(--accent);
+    }
+
+    .checkbox.checked::after {
+      content: "✓";
+      color: var(--bg-primary);
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .item-content {
+      flex: 1;
+    }
+
+    .item-title {
+      color: var(--text-bright);
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .item-desc {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+
+    .item-expected {
+      color: var(--warning);
+      font-size: 0.7rem;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(255, 170, 0, 0.1);
+      border-left: 2px solid var(--warning);
+    }
+
+    .priority-high {
+      border-left: 3px solid var(--error);
+    }
+
+    .priority-medium {
+      border-left: 3px solid var(--warning);
+    }
+
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+    }
+
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .progress-bar {
+      width: 200px;
+      height: 8px;
+      background: var(--border);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      color: var(--accent);
+    }
+
+    .timestamp {
+      color: var(--text-secondary);
+    }
+
+    .note {
+      padding: 1rem 1.5rem;
+      background: rgba(0, 255, 136, 0.05);
+      border-left: 3px solid var(--accent);
+      margin: 1rem 1.5rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .note strong {
+      color: var(--accent);
+    }
+
+    .spacer {
+      height: 80px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">ROOF<span>SIG</span></div>
+      <div class="subtitle">WF-01 InboundVoice_Twilio_AI_Voice // QA Checklist</div>
+      <div class="meta">
+        <div class="meta-item">Version: MVP</div>
+        <div class="meta-item">Date: 2025-12-06</div>
+        <div class="meta-item">Status: PRE-PILOT</div>
+      </div>
+    </header>
+
+    <!-- PRE-TEST SETUP -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">00 // Pre-Test Setup</span>
+        <span class="section-count">4 items</span>
+      </div>
+      <ul class="checklist">
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Clear test data from leads table</div>
+            <div class="item-desc">DELETE FROM leads WHERE phone = '+1XXXXXXXXXX';</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Clear test data from appointments table</div>
+            <div class="item-desc">DELETE FROM appointments WHERE phone = '+1XXXXXXXXXX';</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Clear Google Calendar test events</div>
+            <div class="item-desc">Remove any "Inspection - +1XXXXXXXXXX" events from calendar</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Verify roofer config</div>
+            <div class="item-desc">SELECT id, max_concurrent_appointments FROM roofers;</div>
+            <div class="item-expected">EXPECTED: max_concurrent_appointments = 3</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- STORM MODE -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">01 // Storm Mode</span>
+        <span class="section-count">2 items</span>
+      </div>
+      <ul class="checklist">
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Storm Mode ON → Redirect to Storm workflow</div>
+            <div class="item-desc">Enable storm_mode in roofers table, call in, verify redirect to WF-01 Storm_Mode</div>
+            <div class="item-expected">EXPECTED: Call transfers to storm mode handler, different IVR plays</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Storm Mode OFF → Normal flow</div>
+            <div class="item-desc">Disable storm_mode, call in, verify normal SMS Consent IVR plays</div>
+            <div class="item-expected">EXPECTED: "Press 1 for text booking, press 9 for emergency..."</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SMS CONSENT PATH -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">02 // SMS Consent Path (Press 1)</span>
+        <span class="section-count">5 items</span>
+      </div>
+      <ul class="checklist">
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Press 1 → Receive 3 time slots via SMS</div>
+            <div class="item-desc">Call in, press 1, verify SMS with 3 booking options arrives</div>
+            <div class="item-expected">EXPECTED: SMS with "1) Mon, Dec 9, 9:00 AM" format, 3 options</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Reply "1" → Booking confirmation SMS</div>
+            <div class="item-desc">Reply with digit 1, verify confirmation SMS received</div>
+            <div class="item-expected">EXPECTED: "Confirmed! Your appointment is Mon, Dec 9, 9:00 AM"</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Verify appointment in Supabase</div>
+            <div class="item-desc">SELECT * FROM appointments ORDER BY created_at DESC LIMIT 1;</div>
+            <div class="item-expected">EXPECTED: Row with status='booked', source='sms', correct start_at/end_at</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Verify Google Calendar event created</div>
+            <div class="item-desc">Check roofer calendar for new "Inspection - +1XXX" event</div>
+            <div class="item-expected">EXPECTED: Event with correct time, description includes phone/location</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Verify email notification sent</div>
+            <div class="item-desc">Check admin@roofsig.com inbox for booking notification</div>
+            <div class="item-expected">EXPECTED: HTML email with client phone, time, location, map link</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- EMERGENCY PATH -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">03 // Emergency Path (Press 9)</span>
+        <span class="section-count">5 items</span>
+      </div>
+      <ul class="checklist">
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Press 9 → Direct dial to roofer</div>
+            <div class="item-desc">Call in, press 9, verify phone rings roofer's direct line</div>
+            <div class="item-expected">EXPECTED: Roofer's phone rings within 15 seconds</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer answers → Connected call</div>
+            <div class="item-desc">Answer the direct dial, verify two-way audio</div>
+            <div class="item-expected">EXPECTED: Clear audio both directions, call connected</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-medium">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer no answer → Voicemail capture</div>
+            <div class="item-desc">Let direct dial timeout (15s), leave voicemail message</div>
+            <div class="item-expected">EXPECTED: "Please leave a message" prompt plays, records speech</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Voicemail transcript stored</div>
+            <div class="item-desc">SELECT reason FROM leads WHERE phone = '+1XXX' ORDER BY last_event_at DESC;</div>
+            <div class="item-expected">EXPECTED: Speech-to-text transcript in reason field</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Emergency SMS alert to roofer</div>
+            <div class="item-desc">Verify roofer receives SMS with voicemail content</div>
+            <div class="item-expected">EXPECTED: SMS with "EMERGENCY" flag, transcript, callback number</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- IVR VOICE BOOKING -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">04 // IVR Voice Booking (Digit 1 Soonest)</span>
+        <span class="section-count">4 items</span>
+      </div>
+      <ul class="checklist">
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Stay on line → AI Voice captures reason</div>
+            <div class="item-desc">Call in, don't press any digit, speak reason when prompted</div>
+            <div class="item-expected">EXPECTED: "What's the reason for your call?" → captures speech</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Press 1 → Soonest slot confirmed via voice</div>
+            <div class="item-desc">After reason captured, press 1 for soonest appointment</div>
+            <div class="item-expected">EXPECTED: "You're booked for Monday, December 9th at 9 AM"</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Verify appointment in Supabase</div>
+            <div class="item-desc">SELECT * FROM appointments WHERE source = 'voice' ORDER BY created_at DESC;</div>
+            <div class="item-expected">EXPECTED: Row with source='voice', correct times</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Verify reason stored on lead</div>
+            <div class="item-desc">SELECT reason FROM leads WHERE phone = '+1XXX';</div>
+            <div class="item-expected">EXPECTED: Speech transcript in reason field</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- MAX CONCURRENT APPOINTMENTS -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">05 // Max Concurrent Appointments (Capacity = 3)</span>
+        <span class="section-count">6 items</span>
+      </div>
+      <div class="note">
+        <strong>TEST SETUP:</strong> Clear all appointments and leads. Target slot: Monday 9 AM. 
+        After each booking, DELETE the lead record but KEEP the appointment to simulate different callers.
+      </div>
+      <ul class="checklist">
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Booking #1 (SMS) → 9 AM slot available</div>
+            <div class="item-desc">Call in, press 1, book 9 AM via SMS reply "1"</div>
+            <div class="item-expected">EXPECTED: Booking confirmed, appointment created</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Clear lead, keep appointment</div>
+            <div class="item-desc">DELETE FROM leads WHERE phone = '+1XXX';</div>
+            <div class="item-expected">EXPECTED: appointments table still has 1 row for 9 AM</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Booking #2 (SMS) → 9 AM slot STILL available</div>
+            <div class="item-desc">Call in again, press 1, verify 9 AM is STILL offered</div>
+            <div class="item-expected">EXPECTED: 9 AM appears in SMS options (capacity 1/3)</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Clear lead, keep appointment</div>
+            <div class="item-desc">DELETE FROM leads WHERE phone = '+1XXX'; -- now 2 appointments at 9 AM</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Booking #3 (IVR Voice) → 9 AM slot STILL available</div>
+            <div class="item-desc">Call in, use IVR voice path (press 1 for soonest), verify 9 AM offered</div>
+            <div class="item-expected">EXPECTED: Voice confirms 9 AM booking (capacity 2/3 → 3/3)</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Booking #4 → 9 AM slot NOT available</div>
+            <div class="item-desc">Clear lead, call in, press 1, verify 9 AM is NOT offered</div>
+            <div class="item-expected">EXPECTED: SMS shows 10 AM, 11 AM, 12 PM (9 AM at capacity)</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- HARD BLOCK TEST -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">06 // Hard Block (All-Day Calendar Events)</span>
+        <span class="section-count">2 items</span>
+      </div>
+      <ul class="checklist">
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Create all-day "Office Closed" event</div>
+            <div class="item-desc">Add all-day event in Google Calendar for target date</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Verify blocked date not offered</div>
+            <div class="item-desc">Call in, press 1, verify that blocked date has NO slots</div>
+            <div class="item-expected">EXPECTED: Blocked date skipped entirely in SMS options</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- EDGE CASES -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">07 // Edge Cases</span>
+        <span class="section-count">4 items</span>
+      </div>
+      <ul class="checklist">
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Reply with invalid digit (e.g., "5")</div>
+            <div class="item-desc">Book via SMS, reply with "5" instead of 1/2/3</div>
+            <div class="item-expected">EXPECTED: Error SMS asking to reply 1, 2, or 3</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Reply with text message</div>
+            <div class="item-desc">Reply "Can I get an earlier time?"</div>
+            <div class="item-expected">EXPECTED: Human text forwarded to roofer via SMS alert</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Existing client calls back</div>
+            <div class="item-desc">Call from same number after booking exists</div>
+            <div class="item-expected">EXPECTED: Routes to "Existing Client Menu"</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Outside business hours</div>
+            <div class="item-desc">Call outside 8 AM - 6 PM Central</div>
+            <div class="item-expected">EXPECTED: Same IVR plays (SMS consent available 24/7)</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <div class="spacer"></div>
+  </div>
+
+  <div class="status-bar">
+    <div class="progress">
+      <span>PROGRESS:</span>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-text" id="progressText">0 / 32</span>
+    </div>
+    <div class="timestamp" id="timestamp">Last updated: --</div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'roofsig_qa_checklist_v1';
+
+    function toggle(el) {
+      el.classList.toggle('checked');
+      updateProgress();
+      updateTimestamp();
+      saveState();
+    }
+
+    function updateProgress() {
+      const total = document.querySelectorAll('.checkbox').length;
+      const checked = document.querySelectorAll('.checkbox.checked').length;
+      const percent = (checked / total) * 100;
+      
+      document.getElementById('progressFill').style.width = percent + '%';
+      document.getElementById('progressText').textContent = checked + ' / ' + total;
+    }
+
+    function updateTimestamp() {
+      const now = new Date();
+      const timestamp = now.toLocaleString();
+      document.getElementById('timestamp').textContent = 'Last updated: ' + timestamp;
+      localStorage.setItem(STORAGE_KEY + '_timestamp', timestamp);
+    }
+
+    function saveState() {
+      const checkboxes = document.querySelectorAll('.checkbox');
+      const state = Array.from(checkboxes).map(cb => cb.classList.contains('checked'));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const savedTimestamp = localStorage.getItem(STORAGE_KEY + '_timestamp');
+      
+      if (saved) {
+        const state = JSON.parse(saved);
+        const checkboxes = document.querySelectorAll('.checkbox');
+        checkboxes.forEach((cb, i) => {
+          if (state[i]) cb.classList.add('checked');
+        });
+      }
+      
+      if (savedTimestamp) {
+        document.getElementById('timestamp').textContent = 'Last updated: ' + savedTimestamp;
+      }
+    }
+
+    // Initialize
+    loadState();
+    updateProgress();
+  </script>
+</body>
+</html>
