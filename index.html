@@ -302,7 +302,7 @@
     <!-- STORM MODE -->
     <section>
       <div class="section-header">
-        <span class="section-title">01 // Storm Mode</span>
+        <span class="section-title">01 //  Storm Mode Entry</span>
         <span class="section-count">2 items</span>
       </div>
       <ul class="checklist">
@@ -320,6 +320,253 @@
             <div class="item-title">Storm Mode OFF → Normal flow</div>
             <div class="item-desc">Disable storm_mode, call in, verify normal SMS Consent IVR plays</div>
             <div class="item-expected">EXPECTED: "Press 1 for text booking, press 9 for emergency..."</div>
+          </div>
+        </li>
+
+        <!-- Storm Mode Entry -->
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Call with storm_mode=true → hear IVR</div>
+            <div class="item-desc">Status: READY. Notes: TwiML in Storm Mode Response looks correct.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Press 1 → hear "Please state your emergency" → beep</div>
+            <div class="item-desc">Status: READY. Notes: Emergency Response node configured.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Press 2 → hear "Leave your details" → beep</div>
+            <div class="item-desc">Status: READY. Notes: Standard Response node configured.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Timeout → defaults to standard</div>
+            <div class="item-desc">Status: READY. Notes: Redirect fallback in TwiML.</div>
+          </div>
+        </li>
+
+        <!-- Recording Capture -->
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Recording Capture // Speak for 10+ seconds</div>
+            <div class="item-desc">Status: READY. Notes: Manual test.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Recording Capture // Recording URL captured in Normalize Data</div>
+            <div class="item-desc">Status: BUG. Notes: recording hardcoded to null.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Recording Capture // Verify RecordingUrl not null</div>
+            <div class="item-desc">Status: BUG. Notes: Will always be null.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Recording Capture // Verify SpeechResult not null</div>
+            <div class="item-desc">Status: READY. Notes: reason field uses $json.body.SpeechResult.</div>
+          </div>
+        </li>
+
+        <!-- Lead Management -->
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Lead Management // New caller → lead created</div>
+            <div class="item-desc">Status: BUG. Notes: Lead Does Not Exist is UPDATE, not CREATE.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Lead Management // Existing caller → lead updated</div>
+            <div class="item-desc">Status: READY. Notes: Lead Exists UPDATE works.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Lead Management // Tags reflect priority</div>
+            <div class="item-desc">Status: READY. Notes: Conditional logic in Normalize Data.</div>
+          </div>
+        </li>
+
+        <!-- AI Summary -->
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">AI Summary // LLM receives actual transcript</div>
+            <div class="item-desc">Status: FIXED. Notes: reason now uses $json.body.SpeechResult.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">AI Summary // LLM generates structured summary</div>
+            <div class="item-desc">Status: READY. Notes: Prompt looks correct.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-medium">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">AI Summary // LLM output not empty</div>
+            <div class="item-desc">Status: TEST. Notes: Depends on SpeechResult having content.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-medium">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">AI Summary // LLM latency less than 10 seconds</div>
+            <div class="item-desc">Status: TEST. Notes: DeepSeek usually fast.</div>
+          </div>
+        </li>
+
+        <!-- Roofer SMS Alert -->
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer SMS Alert // SMS received within 30 seconds</div>
+            <div class="item-desc">Status: READY. Notes: Wait node syncs paths.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer SMS Alert // SMS shows priority indicator</div>
+            <div class="item-desc">Status: READY. Notes: Conditional in message.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer SMS Alert // SMS shows caller phone</div>
+            <div class="item-desc">Status: READY. Notes: Uses Normalize Data phone.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer SMS Alert // SMS shows recording URL</div>
+            <div class="item-desc">Status: BUG. Notes: Not in message template.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer SMS Alert // SMS shows AI summary</div>
+            <div class="item-desc">Status: FIXED. Notes: Now includes $json.text.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-medium">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer SMS Alert // MMS with audio</div>
+            <div class="item-desc">Status: DEFER. Notes: Requires mediaUrl param (post-MVP).</div>
+          </div>
+        </li>
+
+        <!-- Roofer Email Alert -->
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer Email Alert // Email received within 60 seconds</div>
+            <div class="item-desc">Status: READY. Notes: Parallel with SMS.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer Email Alert // Email shows caller phone</div>
+            <div class="item-desc">Status: READY. Notes: Uses Normalize Data.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer Email Alert // Email shows recording URL</div>
+            <div class="item-desc">Status: BUG. Notes: Will show "null".</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer Email Alert // Email shows AI summary</div>
+            <div class="item-desc">Status: READY. Notes: Uses $json.text.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Roofer Email Alert // Email subject includes priority</div>
+            <div class="item-desc">Status: BUG. Notes: Static subject line.</div>
+          </div>
+        </li>
+
+        <!-- Caller Confirmation -->
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Caller Confirmation // Caller receives SMS</div>
+            <div class="item-desc">Status: READY. Notes: Confirm to Caller node.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Caller Confirmation // Caller hears TwiML confirmation</div>
+            <div class="item-desc">Status: READY. Notes: Close the Call node.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-medium">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Caller Confirmation // Call ends gracefully</div>
+            <div class="item-desc">Status: TEST. Notes: Depends on all upstream nodes.</div>
+          </div>
+        </li>
+
+        <!-- Edge Cases -->
+        <li class="checklist-item priority-medium">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Edge Cases // Caller hangs up before recording</div>
+            <div class="item-desc">Status: TEST. Notes: May cause null SpeechResult.</div>
+          </div>
+        </li>
+        <li class="checklist-item">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Edge Cases // Recording longer than 60 seconds truncated</div>
+            <div class="item-desc">Status: READY. Notes: maxLength=60 in TwiML.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Edge Cases // LLM fails → SMS and email still send</div>
+            <div class="item-desc">Status: BUG. Notes: No error handling branch.</div>
+          </div>
+        </li>
+        <li class="checklist-item priority-high">
+          <div class="checkbox" onclick="toggle(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Edge Cases // Empty recording handling</div>
+            <div class="item-desc">Status: BUG. Notes: No null check.</div>
           </div>
         </li>
       </ul>
@@ -610,7 +857,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'roofsig_qa_checklist_v1';
+    const STORAGE_KEY = 'roofsig_qa_checklist_v2';
 
     function toggle(el) {
       el.classList.toggle('checked');
