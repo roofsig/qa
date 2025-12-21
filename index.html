@@ -1,913 +1,920 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RoofSig QA Checklist | WF-01</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-primary: #0a0a0a;
-      --bg-secondary: #111111;
-      --bg-card: #1a1a1a;
-      --border: #2a2a2a;
-      --text-primary: #00ff88;
-      --text-secondary: #888888;
-      --text-bright: #ffffff;
-      --accent: #00ff88;
-      --warning: #ffaa00;
-      --error: #ff4444;
-      --success: #00ff88;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'JetBrains Mono', monospace;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      min-height: 100vh;
-      padding: 2rem;
-      line-height: 1.6;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    header {
-      border: 1px solid var(--border);
-      padding: 1.5rem 2rem;
-      margin-bottom: 2rem;
-      background: var(--bg-secondary);
-    }
-
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 2px;
-    }
-
-    .logo span {
-      color: var(--text-secondary);
-    }
-
-    .subtitle {
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-      margin-top: 0.5rem;
-    }
-
-    .meta {
-      display: flex;
-      gap: 2rem;
-      margin-top: 1rem;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .meta-item::before {
-      content: ">";
-      color: var(--accent);
-    }
-
-    section {
-      border: 1px solid var(--border);
-      margin-bottom: 1.5rem;
-      background: var(--bg-card);
-    }
-
-    .section-header {
-      background: var(--bg-secondary);
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .section-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-bright);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .section-count {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-
-    .checklist {
-      list-style: none;
-      padding: 1rem 0;
-    }
-
-    .checklist-item {
-      padding: 0.75rem 1.5rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .checklist-item:last-child {
-      border-bottom: none;
-    }
-
-    .checkbox {
-      width: 18px;
-      height: 18px;
-      border: 2px solid var(--accent);
-      flex-shrink: 0;
-      margin-top: 2px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .checkbox:hover {
-      background: rgba(0, 255, 136, 0.1);
-    }
-
-    .checkbox.checked {
-      background: var(--accent);
-    }
-
-    .checkbox.checked::after {
-      content: "✓";
-      color: var(--bg-primary);
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .item-content {
-      flex: 1;
-    }
-
-    .item-title {
-      color: var(--text-bright);
-      font-size: 0.85rem;
-      margin-bottom: 0.25rem;
-    }
-
-    .item-desc {
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-    }
-
-    .item-expected {
-      color: var(--warning);
-      font-size: 0.7rem;
-      margin-top: 0.5rem;
-      padding: 0.5rem;
-      background: rgba(255, 170, 0, 0.1);
-      border-left: 2px solid var(--warning);
-    }
-
-    .priority-high {
-      border-left: 3px solid var(--error);
-    }
-
-    .priority-medium {
-      border-left: 3px solid var(--warning);
-    }
-
-    .status-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg-secondary);
-      border-top: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.75rem;
-    }
-
-    .progress {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .progress-bar {
-      width: 200px;
-      height: 8px;
-      background: var(--border);
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--accent);
-      width: 0%;
-      transition: width 0.3s;
-    }
-
-    .progress-text {
-      color: var(--accent);
-    }
-
-    .timestamp {
-      color: var(--text-secondary);
-    }
-
-    .note {
-      padding: 1rem 1.5rem;
-      background: rgba(0, 255, 136, 0.05);
-      border-left: 3px solid var(--accent);
-      margin: 1rem 1.5rem;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-
-    .note strong {
-      color: var(--accent);
-    }
-
-    .spacer {
-      height: 80px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoofSig QA Checklist</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #121314;
+            --bg-alt: #1A1C1E;
+            --bg-highlight: #2B2F33;
+            --fg: #D6D3C9;
+            --fg-dim: #A9A399;
+            --fg-bright: #EEE8DD;
+            --black: #1A1C1E;
+            --red: #C56A73;
+            --green: #93B89A;
+            --yellow: #D0B07A;
+            --blue: #7FA7C8;
+            --magenta: #B492C7;
+            --cyan: #79B6B1;
+            --white: #D6D3C9;
+            --br-black: #2B2F33;
+            --br-red: #D47D86;
+            --br-green: #A6C9AC;
+            --br-yellow: #DFC18C;
+            --br-blue: #92B8D6;
+            --br-magenta: #C3A4D3;
+            --br-cyan: #8BC7C2;
+            --br-white: #EEE8DD;
+            --dim-red: #8E4B53;
+            --dim-green: #6E8B74;
+            --dim-yellow: #8F7752;
+            --dim-blue: #5A768A;
+            --dim-magenta: #7B6488;
+            --dim-cyan: #557F7B;
+            --selection: #3B4148;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: var(--bg);
+            color: var(--fg);
+            margin: 0;
+            padding: 16px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        .terminal-frame {
+            border: 1px solid var(--bg-highlight);
+            background: var(--bg);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .terminal-titlebar {
+            background: var(--bg-alt);
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--bg-highlight);
+        }
+        .terminal-dots { display: flex; gap: 6px; }
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: var(--red); }
+        .dot-yellow { background: var(--yellow); }
+        .dot-green { background: var(--green); }
+        .terminal-title { flex: 1; text-align: center; color: var(--fg-dim); font-size: 12px; }
+        .terminal-content { padding: 16px; }
+        header { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--bg-highlight); }
+        .ascii-title { color: var(--cyan); font-size: 10px; line-height: 1.1; margin-bottom: 8px; white-space: pre; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .version-tag { color: var(--fg-dim); }
+        .version-tag span { color: var(--yellow); }
+        .controls { display: flex; gap: 8px; }
+        button {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            padding: 4px 12px;
+            background: var(--bg-alt);
+            color: var(--fg);
+            border: 1px solid var(--bg-highlight);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        button:hover { background: var(--bg-highlight); border-color: var(--fg-dim); }
+        button.danger:hover { border-color: var(--red); color: var(--red); }
+        .summary {
+            background: var(--bg-alt);
+            border: 1px solid var(--bg-highlight);
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            color: var(--fg-dim);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-header .label { color: var(--cyan); }
+        .progress-container { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .progress-bar {
+            flex: 1;
+            height: 16px;
+            background: var(--bg);
+            border: 1px solid var(--bg-highlight);
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--dim-green), var(--green));
+            transition: width 0.3s ease;
+        }
+        .progress-text { color: var(--br-green); min-width: 50px; text-align: right; }
+        .stats-row { display: flex; gap: 24px; flex-wrap: wrap; }
+        .stat { display: flex; align-items: center; gap: 6px; }
+        .stat-box { width: 8px; height: 8px; }
+        .stat-box.pass { background: var(--green); }
+        .stat-box.fail { background: var(--red); }
+        .stat-box.skip { background: var(--yellow); }
+        .stat-box.pending { background: var(--bg-highlight); border: 1px solid var(--fg-dim); }
+        .stat-label { color: var(--fg-dim); }
+        .stat-value { color: var(--fg); }
+        .stat-value.pass { color: var(--green); }
+        .stat-value.fail { color: var(--red); }
+        .stat-value.skip { color: var(--yellow); }
+        .timestamp { color: var(--fg-dim); font-size: 11px; margin-top: 8px; }
+        .timestamp span { color: var(--blue); }
+        .sql-block {
+            background: var(--bg-alt);
+            border: 1px solid var(--bg-highlight);
+            border-left: 3px solid var(--magenta);
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 11px;
+            overflow-x: auto;
+        }
+        .sql-block .title { color: var(--magenta); margin-bottom: 8px; }
+        .sql-block pre { margin: 0; color: var(--fg-dim); white-space: pre-wrap; }
+        .sql-block .kw { color: var(--magenta); }
+        .sql-block .tbl { color: var(--cyan); }
+        .sql-block .str { color: var(--yellow); }
+        section { margin-bottom: 20px; }
+        .section-header {
+            background: var(--bg-alt);
+            border: 1px solid var(--bg-highlight);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1px;
+        }
+        .section-title { color: var(--cyan); }
+        .section-title::before { content: '┌─ '; color: var(--bg-highlight); }
+        .section-progress { color: var(--fg-dim); font-size: 11px; }
+        .section-progress .done { color: var(--green); }
+        .scenario {
+            background: var(--bg-alt);
+            border: 1px solid var(--bg-highlight);
+            border-top: none;
+            padding: 12px 12px 12px 20px;
+            position: relative;
+        }
+        .scenario::before {
+            content: '│';
+            position: absolute;
+            left: 6px;
+            top: 12px;
+            color: var(--bg-highlight);
+        }
+        .scenario:last-of-type::before { content: '└'; }
+        .scenario-header { display: flex; gap: 12px; align-items: flex-start; }
+        .scenario-checkbox {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--fg-dim);
+            background: var(--bg);
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .scenario-checkbox:checked { border-color: var(--green); }
+        .scenario-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--green);
+            font-size: 12px;
+        }
+        .scenario-title { color: var(--fg); font-weight: 500; }
+        .scenario-title .num { color: var(--yellow); }
+        .scenario-content { margin-left: 28px; margin-top: 8px; font-size: 12px; }
+        .step { margin-bottom: 6px; padding-left: 12px; border-left: 1px solid var(--bg-highlight); }
+        .step-label { color: var(--blue); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .step-content { color: var(--fg-dim); }
+        .db-check {
+            background: var(--bg);
+            border: 1px solid var(--bg-highlight);
+            border-left: 2px solid var(--cyan);
+            padding: 8px 12px;
+            margin: 8px 0;
+            font-size: 11px;
+        }
+        .db-check .title { color: var(--cyan); margin-bottom: 4px; }
+        .db-check .item { color: var(--fg-dim); }
+        .db-check .fld { color: var(--magenta); }
+        .db-check .val { color: var(--yellow); }
+        .tip {
+            background: var(--bg);
+            border: 1px solid var(--yellow);
+            border-left: 2px solid var(--yellow);
+            padding: 8px 12px;
+            margin: 8px 0;
+            color: var(--yellow);
+            font-size: 11px;
+        }
+        .tip::before { content: '⚠ '; }
+        .status-buttons { display: flex; gap: 6px; margin-top: 10px; margin-left: 28px; }
+        .status-btn {
+            font-size: 11px;
+            padding: 3px 10px;
+            background: transparent;
+            border: 1px solid var(--bg-highlight);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-btn.pass { color: var(--dim-green); border-color: var(--dim-green); }
+        .status-btn.fail { color: var(--dim-red); border-color: var(--dim-red); }
+        .status-btn.skip { color: var(--dim-yellow); border-color: var(--dim-yellow); }
+        .status-btn.pass:hover, .status-btn.active.pass { background: var(--green); color: var(--bg); border-color: var(--green); }
+        .status-btn.fail:hover, .status-btn.active.fail { background: var(--red); color: var(--bg); border-color: var(--red); }
+        .status-btn.skip:hover, .status-btn.active.skip { background: var(--yellow); color: var(--bg); border-color: var(--yellow); }
+        .scenario.completed { opacity: 0.5; }
+        .scenario.completed .scenario-title { text-decoration: line-through; color: var(--fg-dim); }
+        .scenario.failed { border-left: 2px solid var(--red); }
+        .scenario.skipped { border-left: 2px solid var(--yellow); }
+        .notes-toggle { font-size: 11px; color: var(--fg-dim); cursor: pointer; margin-top: 8px; margin-left: 28px; }
+        .notes-toggle:hover { color: var(--fg); }
+        .notes-area { display: none; margin-top: 8px; margin-left: 28px; }
+        .notes-area.open { display: block; }
+        .notes-area textarea {
+            width: 100%;
+            min-height: 60px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 8px;
+            background: var(--bg);
+            color: var(--fg);
+            border: 1px solid var(--bg-highlight);
+            resize: vertical;
+        }
+        .notes-area textarea:focus { outline: none; border-color: var(--cyan); }
+        .session-notes { background: var(--bg-alt); border: 1px solid var(--bg-highlight); padding: 12px; }
+        .session-notes .field-group { margin-bottom: 12px; }
+        .session-notes label {
+            display: block;
+            color: var(--blue);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .session-notes input, .session-notes textarea {
+            width: 100%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            padding: 8px;
+            background: var(--bg);
+            color: var(--fg);
+            border: 1px solid var(--bg-highlight);
+        }
+        .session-notes textarea { min-height: 60px; resize: vertical; }
+        .session-notes input:focus, .session-notes textarea:focus { outline: none; border-color: var(--cyan); }
+        .terminal-footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--bg-highlight);
+            display: flex;
+            justify-content: space-between;
+            color: var(--fg-dim);
+            font-size: 11px;
+        }
+        .terminal-footer .cmd { color: var(--green); }
+        .terminal-footer .path { color: var(--blue); }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-highlight); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--fg-dim); }
+        @media (max-width: 600px) {
+            body { padding: 8px; font-size: 12px; }
+            .ascii-title { display: none; }
+            .stats-row { gap: 12px; }
+            .terminal-content { padding: 12px; }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="logo">ROOF<span>SIG</span></div>
-      <div class="subtitle">WF-01 InboundVoice_Twilio_AI_Voice // QA Checklist</div>
-      <div class="meta">
-        <div class="meta-item">Version: MVP</div>
-        <div class="meta-item">Date: 2025-12-06</div>
-        <div class="meta-item">Status: PRE-PILOT</div>
-      </div>
-    </header>
-
-    <!-- PRE-TEST SETUP -->
-    <section>
-      <div class="section-header">
-        <span class="section-title">00 // Pre-Test Setup</span>
-        <span class="section-count">4 items</span>
-      </div>
-      <ul class="checklist">
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Clear test data from leads table</div>
-            <div class="item-desc">DELETE FROM leads WHERE phone = '+1XXXXXXXXXX';</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Clear test data from appointments table</div>
-            <div class="item-desc">DELETE FROM appointments WHERE phone = '+1XXXXXXXXXX';</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Clear Google Calendar test events</div>
-            <div class="item-desc">Remove any "Inspection - +1XXXXXXXXXX" events from calendar</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Verify roofer config</div>
-            <div class="item-desc">SELECT id, max_concurrent_appointments FROM roofers;</div>
-            <div class="item-expected">EXPECTED: max_concurrent_appointments = 3</div>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <!-- STORM MODE -->
-    <section>
-      <div class="section-header">
-        <span class="section-title">01 //  Storm Mode Entry</span>
-        <span class="section-count">2 items</span>
-      </div>
-      <ul class="checklist">
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Storm Mode ON → Redirect to Storm workflow</div>
-            <div class="item-desc">Enable storm_mode in roofers table, call in, verify redirect to WF-01 Storm_Mode</div>
-            <div class="item-expected">EXPECTED: Call transfers to storm mode handler, different IVR plays</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Storm Mode OFF → Normal flow</div>
-            <div class="item-desc">Disable storm_mode, call in, verify normal SMS Consent IVR plays</div>
-            <div class="item-expected">EXPECTED: "Press 1 for text booking, press 9 for emergency..."</div>
-          </div>
-        </li>
-
-        <!-- Storm Mode Entry -->
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Call with storm_mode=true → hear IVR</div>
-            <div class="item-desc">Status: READY. Notes: TwiML in Storm Mode Response looks correct.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Press 1 → hear "Please state your emergency" → beep</div>
-            <div class="item-desc">Status: READY. Notes: Emergency Response node configured.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Press 2 → hear "Leave your details" → beep</div>
-            <div class="item-desc">Status: READY. Notes: Standard Response node configured.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Timeout → defaults to standard</div>
-            <div class="item-desc">Status: READY. Notes: Redirect fallback in TwiML.</div>
-          </div>
-        </li>
-
-        <!-- Recording Capture -->
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Recording Capture // Speak for 10+ seconds</div>
-            <div class="item-desc">Status: READY. Notes: Manual test.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Recording Capture // Recording URL captured in Normalize Data</div>
-            <div class="item-desc">Status: BUG. Notes: recording hardcoded to null.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Recording Capture // Verify RecordingUrl not null</div>
-            <div class="item-desc">Status: BUG. Notes: Will always be null.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Recording Capture // Verify SpeechResult not null</div>
-            <div class="item-desc">Status: READY. Notes: reason field uses $json.body.SpeechResult.</div>
-          </div>
-        </li>
-
-        <!-- Lead Management -->
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Lead Management // New caller → lead created</div>
-            <div class="item-desc">Status: BUG. Notes: Lead Does Not Exist is UPDATE, not CREATE.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Lead Management // Existing caller → lead updated</div>
-            <div class="item-desc">Status: READY. Notes: Lead Exists UPDATE works.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Lead Management // Tags reflect priority</div>
-            <div class="item-desc">Status: READY. Notes: Conditional logic in Normalize Data.</div>
-          </div>
-        </li>
-
-        <!-- AI Summary -->
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">AI Summary // LLM receives actual transcript</div>
-            <div class="item-desc">Status: FIXED. Notes: reason now uses $json.body.SpeechResult.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">AI Summary // LLM generates structured summary</div>
-            <div class="item-desc">Status: READY. Notes: Prompt looks correct.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-medium">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">AI Summary // LLM output not empty</div>
-            <div class="item-desc">Status: TEST. Notes: Depends on SpeechResult having content.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-medium">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">AI Summary // LLM latency less than 10 seconds</div>
-            <div class="item-desc">Status: TEST. Notes: DeepSeek usually fast.</div>
-          </div>
-        </li>
-
-        <!-- Roofer SMS Alert -->
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer SMS Alert // SMS received within 30 seconds</div>
-            <div class="item-desc">Status: READY. Notes: Wait node syncs paths.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer SMS Alert // SMS shows priority indicator</div>
-            <div class="item-desc">Status: READY. Notes: Conditional in message.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer SMS Alert // SMS shows caller phone</div>
-            <div class="item-desc">Status: READY. Notes: Uses Normalize Data phone.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer SMS Alert // SMS shows recording URL</div>
-            <div class="item-desc">Status: BUG. Notes: Not in message template.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer SMS Alert // SMS shows AI summary</div>
-            <div class="item-desc">Status: FIXED. Notes: Now includes $json.text.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-medium">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer SMS Alert // MMS with audio</div>
-            <div class="item-desc">Status: DEFER. Notes: Requires mediaUrl param (post-MVP).</div>
-          </div>
-        </li>
-
-        <!-- Roofer Email Alert -->
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer Email Alert // Email received within 60 seconds</div>
-            <div class="item-desc">Status: READY. Notes: Parallel with SMS.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer Email Alert // Email shows caller phone</div>
-            <div class="item-desc">Status: READY. Notes: Uses Normalize Data.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer Email Alert // Email shows recording URL</div>
-            <div class="item-desc">Status: BUG. Notes: Will show "null".</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer Email Alert // Email shows AI summary</div>
-            <div class="item-desc">Status: READY. Notes: Uses $json.text.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer Email Alert // Email subject includes priority</div>
-            <div class="item-desc">Status: BUG. Notes: Static subject line.</div>
-          </div>
-        </li>
-
-        <!-- Caller Confirmation -->
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Caller Confirmation // Caller receives SMS</div>
-            <div class="item-desc">Status: READY. Notes: Confirm to Caller node.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Caller Confirmation // Caller hears TwiML confirmation</div>
-            <div class="item-desc">Status: READY. Notes: Close the Call node.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-medium">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Caller Confirmation // Call ends gracefully</div>
-            <div class="item-desc">Status: TEST. Notes: Depends on all upstream nodes.</div>
-          </div>
-        </li>
-
-        <!-- Edge Cases -->
-        <li class="checklist-item priority-medium">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Edge Cases // Caller hangs up before recording</div>
-            <div class="item-desc">Status: TEST. Notes: May cause null SpeechResult.</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Edge Cases // Recording longer than 60 seconds truncated</div>
-            <div class="item-desc">Status: READY. Notes: maxLength=60 in TwiML.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Edge Cases // LLM fails → SMS and email still send</div>
-            <div class="item-desc">Status: BUG. Notes: No error handling branch.</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Edge Cases // Empty recording handling</div>
-            <div class="item-desc">Status: BUG. Notes: No null check.</div>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <!-- SMS CONSENT PATH -->
-    <section>
-      <div class="section-header">
-        <span class="section-title">02 // SMS Consent Path (Press 1)</span>
-        <span class="section-count">5 items</span>
-      </div>
-      <ul class="checklist">
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Press 1 → Receive 3 time slots via SMS</div>
-            <div class="item-desc">Call in, press 1, verify SMS with 3 booking options arrives</div>
-            <div class="item-expected">EXPECTED: SMS with "1) Mon, Dec 9, 9:00 AM" format, 3 options</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Reply "1" → Booking confirmation SMS</div>
-            <div class="item-desc">Reply with digit 1, verify confirmation SMS received</div>
-            <div class="item-expected">EXPECTED: "Confirmed! Your appointment is Mon, Dec 9, 9:00 AM"</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Verify appointment in Supabase</div>
-            <div class="item-desc">SELECT * FROM appointments ORDER BY created_at DESC LIMIT 1;</div>
-            <div class="item-expected">EXPECTED: Row with status='booked', source='sms', correct start_at/end_at</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Verify Google Calendar event created</div>
-            <div class="item-desc">Check roofer calendar for new "Inspection - +1XXX" event</div>
-            <div class="item-expected">EXPECTED: Event with correct time, description includes phone/location</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Verify email notification sent</div>
-            <div class="item-desc">Check admin@roofsig.com inbox for booking notification</div>
-            <div class="item-expected">EXPECTED: HTML email with client phone, time, location, map link</div>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <!-- EMERGENCY PATH -->
-    <section>
-      <div class="section-header">
-        <span class="section-title">03 // Emergency Path (Press 9)</span>
-        <span class="section-count">5 items</span>
-      </div>
-      <ul class="checklist">
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Press 9 → Direct dial to roofer</div>
-            <div class="item-desc">Call in, press 9, verify phone rings roofer's direct line</div>
-            <div class="item-expected">EXPECTED: Roofer's phone rings within 15 seconds</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer answers → Connected call</div>
-            <div class="item-desc">Answer the direct dial, verify two-way audio</div>
-            <div class="item-expected">EXPECTED: Clear audio both directions, call connected</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-medium">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Roofer no answer → Voicemail capture</div>
-            <div class="item-desc">Let direct dial timeout (15s), leave voicemail message</div>
-            <div class="item-expected">EXPECTED: "Please leave a message" prompt plays, records speech</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Voicemail transcript stored</div>
-            <div class="item-desc">SELECT reason FROM leads WHERE phone = '+1XXX' ORDER BY last_event_at DESC;</div>
-            <div class="item-expected">EXPECTED: Speech-to-text transcript in reason field</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Emergency SMS alert to roofer</div>
-            <div class="item-desc">Verify roofer receives SMS with voicemail content</div>
-            <div class="item-expected">EXPECTED: SMS with "EMERGENCY" flag, transcript, callback number</div>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <!-- IVR VOICE BOOKING -->
-    <section>
-      <div class="section-header">
-        <span class="section-title">04 // IVR Voice Booking (Digit 1 Soonest)</span>
-        <span class="section-count">4 items</span>
-      </div>
-      <ul class="checklist">
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Stay on line → AI Voice captures reason</div>
-            <div class="item-desc">Call in, don't press any digit, speak reason when prompted</div>
-            <div class="item-expected">EXPECTED: "What's the reason for your call?" → captures speech</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Press 1 → Soonest slot confirmed via voice</div>
-            <div class="item-desc">After reason captured, press 1 for soonest appointment</div>
-            <div class="item-expected">EXPECTED: "You're booked for Monday, December 9th at 9 AM"</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Verify appointment in Supabase</div>
-            <div class="item-desc">SELECT * FROM appointments WHERE source = 'voice' ORDER BY created_at DESC;</div>
-            <div class="item-expected">EXPECTED: Row with source='voice', correct times</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Verify reason stored on lead</div>
-            <div class="item-desc">SELECT reason FROM leads WHERE phone = '+1XXX';</div>
-            <div class="item-expected">EXPECTED: Speech transcript in reason field</div>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <!-- MAX CONCURRENT APPOINTMENTS -->
-    <section>
-      <div class="section-header">
-        <span class="section-title">05 // Max Concurrent Appointments (Capacity = 3)</span>
-        <span class="section-count">6 items</span>
-      </div>
-      <div class="note">
-        <strong>TEST SETUP:</strong> Clear all appointments and leads. Target slot: Monday 9 AM. 
-        After each booking, DELETE the lead record but KEEP the appointment to simulate different callers.
-      </div>
-      <ul class="checklist">
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Booking #1 (SMS) → 9 AM slot available</div>
-            <div class="item-desc">Call in, press 1, book 9 AM via SMS reply "1"</div>
-            <div class="item-expected">EXPECTED: Booking confirmed, appointment created</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Clear lead, keep appointment</div>
-            <div class="item-desc">DELETE FROM leads WHERE phone = '+1XXX';</div>
-            <div class="item-expected">EXPECTED: appointments table still has 1 row for 9 AM</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Booking #2 (SMS) → 9 AM slot STILL available</div>
-            <div class="item-desc">Call in again, press 1, verify 9 AM is STILL offered</div>
-            <div class="item-expected">EXPECTED: 9 AM appears in SMS options (capacity 1/3)</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Clear lead, keep appointment</div>
-            <div class="item-desc">DELETE FROM leads WHERE phone = '+1XXX'; -- now 2 appointments at 9 AM</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Booking #3 (IVR Voice) → 9 AM slot STILL available</div>
-            <div class="item-desc">Call in, use IVR voice path (press 1 for soonest), verify 9 AM offered</div>
-            <div class="item-expected">EXPECTED: Voice confirms 9 AM booking (capacity 2/3 → 3/3)</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Booking #4 → 9 AM slot NOT available</div>
-            <div class="item-desc">Clear lead, call in, press 1, verify 9 AM is NOT offered</div>
-            <div class="item-expected">EXPECTED: SMS shows 10 AM, 11 AM, 12 PM (9 AM at capacity)</div>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <!-- HARD BLOCK TEST -->
-    <section>
-      <div class="section-header">
-        <span class="section-title">06 // Hard Block (All-Day Calendar Events)</span>
-        <span class="section-count">2 items</span>
-      </div>
-      <ul class="checklist">
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Create all-day "Office Closed" event</div>
-            <div class="item-desc">Add all-day event in Google Calendar for target date</div>
-          </div>
-        </li>
-        <li class="checklist-item priority-high">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Verify blocked date not offered</div>
-            <div class="item-desc">Call in, press 1, verify that blocked date has NO slots</div>
-            <div class="item-expected">EXPECTED: Blocked date skipped entirely in SMS options</div>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <!-- EDGE CASES -->
-    <section>
-      <div class="section-header">
-        <span class="section-title">07 // Edge Cases</span>
-        <span class="section-count">4 items</span>
-      </div>
-      <ul class="checklist">
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Reply with invalid digit (e.g., "5")</div>
-            <div class="item-desc">Book via SMS, reply with "5" instead of 1/2/3</div>
-            <div class="item-expected">EXPECTED: Error SMS asking to reply 1, 2, or 3</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Reply with text message</div>
-            <div class="item-desc">Reply "Can I get an earlier time?"</div>
-            <div class="item-expected">EXPECTED: Human text forwarded to roofer via SMS alert</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Existing client calls back</div>
-            <div class="item-desc">Call from same number after booking exists</div>
-            <div class="item-expected">EXPECTED: Routes to "Existing Client Menu"</div>
-          </div>
-        </li>
-        <li class="checklist-item">
-          <div class="checkbox" onclick="toggle(this)"></div>
-          <div class="item-content">
-            <div class="item-title">Outside business hours</div>
-            <div class="item-desc">Call outside 8 AM - 6 PM Central</div>
-            <div class="item-expected">EXPECTED: Same IVR plays (SMS consent available 24/7)</div>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <div class="spacer"></div>
-  </div>
-
-  <div class="status-bar">
-    <div class="progress">
-      <span>PROGRESS:</span>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-      <span class="progress-text" id="progressText">0 / 32</span>
+<div class="terminal-frame">
+    <div class="terminal-titlebar">
+        <div class="terminal-dots">
+            <div class="terminal-dot dot-red"></div>
+            <div class="terminal-dot dot-yellow"></div>
+            <div class="terminal-dot dot-green"></div>
+        </div>
+        <div class="terminal-title">roofsig-qa — ~/qa/checklist.sh</div>
+        <div class="controls">
+            <button id="reset-btn" class="danger">[R]eset</button>
+            <button id="export-btn">[E]xport</button>
+        </div>
     </div>
-    <div class="timestamp" id="timestamp">Last updated: --</div>
-  </div>
+    <div class="terminal-content">
+        <header>
+            <pre class="ascii-title">╦═╗╔═╗╔═╗╔═╗╔═╗╦╔═╗  ╔═╗ ╔═╗
+╠╦╝║ ║║ ║╠╣ ╚═╗║║ ╦  ║═╬╗╠═╣
+╩╚═╚═╝╚═╝╚  ╚═╝╩╚═╝  ╚═╝╚╩ ╩</pre>
+            <div class="header-row">
+                <div class="version-tag">version <span>WF-01</span> | workflow validation suite</div>
+            </div>
+        </header>
+        <div class="summary">
+            <div class="summary-header">
+                <span class="label">┌─ progress ─┐</span>
+                <span>scenarios: <span id="total-scenarios">15</span></span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 0%"></div></div>
+                <div class="progress-text"><span id="progress-pct">0</span>%</div>
+            </div>
+            <div class="stats-row">
+                <div class="stat"><div class="stat-box pass"></div><span class="stat-label">pass:</span><span class="stat-value pass" id="stat-pass">0</span></div>
+                <div class="stat"><div class="stat-box fail"></div><span class="stat-label">fail:</span><span class="stat-value fail" id="stat-fail">0</span></div>
+                <div class="stat"><div class="stat-box skip"></div><span class="stat-label">skip:</span><span class="stat-value skip" id="stat-skip">0</span></div>
+                <div class="stat"><div class="stat-box pending"></div><span class="stat-label">pending:</span><span class="stat-value" id="stat-pending">15</span></div>
+            </div>
+            <div class="timestamp">last_updated: <span id="last-updated">null</span></div>
+        </div>
+        <div class="sql-block">
+            <div class="title">/* SOFT_RESET.sql — run between scenarios unless noted */</div>
+            <pre><span class="kw">DELETE FROM</span> <span class="tbl">appointments</span> <span class="kw">WHERE</span> lead_id <span class="kw">IN</span> (<span class="kw">SELECT</span> id <span class="kw">FROM</span> <span class="tbl">leads</span> <span class="kw">WHERE</span> phone = <span class="str">'YOUR_TEST_PHONE'</span>);
+<span class="kw">DELETE FROM</span> <span class="tbl">callback_tasks</span> <span class="kw">WHERE</span> lead_id <span class="kw">IN</span> (<span class="kw">SELECT</span> id <span class="kw">FROM</span> <span class="tbl">leads</span> <span class="kw">WHERE</span> phone = <span class="str">'YOUR_TEST_PHONE'</span>);
+<span class="kw">UPDATE</span> <span class="tbl">leads</span> <span class="kw">SET</span> stage = <span class="str">'new'</span>, last_event_at = <span class="kw">NULL WHERE</span> phone = <span class="str">'YOUR_TEST_PHONE'</span>;
+<span class="kw">UPDATE</span> <span class="tbl">operator_appointment_slots</span> <span class="kw">SET</span> status = <span class="str">'available'</span> <span class="kw">WHERE</span> status = <span class="str">'booked'</span> <span class="kw">AND</span> appointment_id <span class="kw">IS NULL</span>;</pre>
+        </div>
+        <section data-section="A">
+            <div class="section-header">
+                <div class="section-title">Section A: Basic Functionality</div>
+                <div class="section-progress"><span class="done" data-section-done="A">0</span>/<span data-section-total="A">6</span></div>
+            </div>
+            <div class="scenario" data-id="1">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="1">
+                    <div class="scenario-title"><span class="num">01</span> Happy Path (New Lead, Business Hours)</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Ensure business_hours in roofers table covers current time</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call the RoofSig number</div></div>
+                    <div class="step"><div class="step-label">voice_check</div><div class="step-content">Hear greeting → Press 1 (SMS Booking)</div></div>
+                    <div class="step"><div class="step-label">sms_check</div><div class="step-content">Receive "Here are available times..." text</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "1"</div></div>
+                    <div class="step"><div class="step-label">sms_check</div><div class="step-content">Receive "Confirmed... reply with address."</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "123 Test St, Austin, TX 78701"</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB VERIFICATION</div>
+                        <div class="item">→ <span class="tbl">leads</span>: <span class="fld">stage</span> = <span class="val">'qualified'</span>, <span class="fld">zip_code</span> = <span class="val">'78701'</span></div>
+                        <div class="item">→ <span class="tbl">appointments</span>: row exists, <span class="fld">status</span> = <span class="val">'scheduled'</span>, address populated</div>
+                        <div class="item">→ <span class="tbl">operator_appointment_slots</span>: slot status → <span class="val">'booked'</span></div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="2">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="2">
+                    <div class="scenario-title"><span class="num">02</span> After Hours Logic</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Update roofers.business_hours so current time is CLOSED</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call the number</div></div>
+                    <div class="step"><div class="step-label">voice_check</div><div class="step-content">Hear "Our office is closed..." → Beep</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Leave voicemail: "I have a leak." Hang up.</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB VERIFICATION</div>
+                        <div class="item">→ <span class="tbl">call_events</span>: <span class="fld">bucket</span> = <span class="val">'after_hours'</span></div>
+                        <div class="item">→ <span class="tbl">callback_tasks</span>: new row, <span class="fld">status</span> = <span class="val">'pending'</span></div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="3">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="3">
+                    <div class="scenario-title"><span class="num">03</span> Existing Client Recognition</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="tip">Do NOT run Soft Reset. Continue from Scenario 1</div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call the number</div></div>
+                    <div class="step"><div class="step-label">voice_check</div><div class="step-content">Hear "Welcome back... Press 2 to leave a message"</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Press 2 → Leave voicemail "I need to reschedule."</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB VERIFICATION</div>
+                        <div class="item">→ <span class="tbl">call_events</span>: <span class="fld">bucket</span> = <span class="val">'voicemail'</span></div>
+                        <div class="item">→ <span class="tbl">transcripts</span>: row with <span class="fld">channel</span> = <span class="val">'appointment_update'</span></div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="4">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="4">
+                    <div class="scenario-title"><span class="num">04</span> Storm Mode (The Radar)</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Run activate_storm_mode function. Ensure location matches zip.</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call the number</div></div>
+                    <div class="step"><div class="step-label">voice_check</div><div class="step-content">Hear "Storm Response... Press 1 for active leak."</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Press 1 → Say: "My roof is gone in 78701."</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB VERIFICATION</div>
+                        <div class="item">→ <span class="tbl">leads</span>: <span class="fld">tags</span> contains <span class="val">['storm', 'emergency']</span></div>
+                        <div class="item">→ <span class="tbl">storm_events</span>: <span class="fld">calls_received</span> incremented</div>
+                    </div>
+                    <div class="db-check">
+                        <div class="title">// WORKFLOW VERIFICATION</div>
+                        <div class="item">→ Check n8n Executions — Did Sector Check run?</div>
+                        <div class="item">→ Did Targeting Switch route correctly?</div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="5">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="5">
+                    <div class="scenario-title"><span class="num">05</span> Botched Address (Error Handling)</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Soft Reset. Get to "Reply with address" stage.</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "No"</div></div>
+                    <div class="step"><div class="step-label">sms_check</div><div class="step-content">Receive "Invalid address" or "Human review needed"</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB VERIFICATION</div>
+                        <div class="item">→ <span class="tbl">callback_tasks</span>: row created for human review</div>
+                        <div class="item">→ <span class="tbl">appointments</span>: address should NOT be "No"</div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="6">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="6">
+                    <div class="scenario-title"><span class="num">06</span> The Opt-Out</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Any stage</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "STOP"</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB VERIFICATION</div>
+                        <div class="item">→ <span class="tbl">leads</span>: <span class="fld">consent_sms</span> = <span class="val">false</span>, <span class="fld">stage</span> = <span class="val">'unresponsive'</span></div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+        </section>
+        <section data-section="B">
+            <div class="section-header">
+                <div class="section-title">Section B: Capacity & Concurrency</div>
+                <div class="section-progress"><span class="done" data-section-done="B">0</span>/<span data-section-total="B">3</span></div>
+            </div>
+            <div class="scenario" data-id="7">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="7">
+                    <div class="scenario-title"><span class="num">07</span> Sold Out Slot</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">setup</div><div class="step-content">Use "Busy Morning" script to fully book first slot</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in → Press 1 for SMS</div></div>
+                    <div class="step"><div class="step-label">expected</div><div class="step-content">SMS list starts at second slot. Booked slot invisible.</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB CHECK</div>
+                        <div class="item">→ <span class="tbl">operator_appointment_slots</span> all <span class="fld">status</span>=<span class="val">'booked'</span></div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="8">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="8">
+                    <div class="scenario-title"><span class="num">08</span> Last Seat Booking</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">setup</div><div class="step-content">Set max_concurrent_appointments = 3. Book 2 via SQL.</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in → Book that time</div></div>
+                    <div class="step"><div class="step-label">expected</div><div class="step-content">System accepts it</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB CHECK</div>
+                        <div class="item">→ Lead assigned to third operator. Available count = 0.</div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="9">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="9">
+                    <div class="scenario-title"><span class="num">09</span> Zero Inventory</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">setup</div><div class="step-content">Update ALL slots for 7 days to blocked/booked</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in → Press 1</div></div>
+                    <div class="step"><div class="step-label">expected</div><div class="step-content">"We are fully booked, we will call you" fallback</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB CHECK</div>
+                        <div class="item">→ No error logs in <span class="tbl">timeline_events</span></div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+        </section>
+        <section data-section="C">
+            <div class="section-header">
+                <div class="section-title">Section C: User Behavior (Chaos)</div>
+                <div class="section-progress"><span class="done" data-section-done="C">0</span>/<span data-section-total="C">4</span></div>
+            </div>
+            <div class="scenario" data-id="10">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="10">
+                    <div class="scenario-title"><span class="num">10</span> The Ghost (Abandonment)</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call → Get SMS → Reply "1" → Receive "Send Address"</div></div>
+                    <div class="step"><div class="step-label">behavior</div><div class="step-content">Stop replying. Do not send address.</div></div>
+                    <div class="step"><div class="step-label">wait</div><div class="step-content">24 hours (simulate)</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB CHECK</div>
+                        <div class="item">→ <span class="tbl">appointments</span> exists, <span class="fld">address</span> = <span class="val">NULL</span></div>
+                        <div class="item">→ <span class="fld">status</span> = <span class="val">'scheduled'</span> (holding slot)</div>
+                    </div>
+                    <div class="tip">V2 TODO: Auto-release slots with no address after 24h</div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="11">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="11">
+                    <div class="scenario-title"><span class="num">11</span> Fat Finger (Invalid Inputs)</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">prompt</div><div class="step-content">"Reply 1, 2, or 3"</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "4" or "Yes"</div></div>
+                    <div class="step"><div class="step-label">expected</div><div class="step-content">"Invalid option" SMS or fallback to human</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB CHECK</div>
+                        <div class="item">→ <span class="tbl">callback_tasks</span> created if human fallback</div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="12">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="12">
+                    <div class="scenario-title"><span class="num">12</span> Talkative User (Regex)</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">prompt</div><div class="step-content">"Reply 1, 2, or 3"</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "I'll take number 1 thanks"</div></div>
+                    <div class="step"><div class="step-label">expected_smart</div><div class="step-content">Parses "1"</div></div>
+                    <div class="step"><div class="step-label">expected_strict</div><div class="step-content">Sends to human review</div></div>
+                    <div class="tip">Current logic likely sends to human review. Verify.</div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="13">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="13">
+                    <div class="scenario-title"><span class="num">13</span> Double Tap (Idempotency)</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "1". Wait 2s. Reply "1" again.</div></div>
+                    <div class="step"><div class="step-label">expected</div><div class="step-content">First: books. Second: "Already scheduled" or ignored.</div></div>
+                    <div class="tip">FAILURE STATE: Books two slots for same lead</div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+        </section>
+        <section data-section="D">
+            <div class="section-header">
+                <div class="section-title">Section D: Operator Logic</div>
+                <div class="section-progress"><span class="done" data-section-done="D">0</span>/<span data-section-total="D">2</span></div>
+            </div>
+            <div class="scenario" data-id="14">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="14">
+                    <div class="scenario-title"><span class="num">14</span> Sick Day (Operator Block)</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">setup</div><div class="step-content">Run sre_block_operator(roofer_id, operator_id, time_range)</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in</div></div>
+                    <div class="step"><div class="step-label">expected</div><div class="step-content">System does NOT offer Operator A slots</div></div>
+                    <div class="db-check">
+                        <div class="title">// DB CHECK</div>
+                        <div class="item">→ <span class="tbl">operator_appointment_slots</span> <span class="fld">status</span> = <span class="val">'blocked'</span></div>
+                    </div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+            <div class="scenario" data-id="15">
+                <div class="scenario-header">
+                    <input type="checkbox" class="scenario-checkbox" data-id="15">
+                    <div class="scenario-title"><span class="num">15</span> Lazy Operator (Availability)</div>
+                </div>
+                <div class="scenario-content">
+                    <div class="step"><div class="step-label">setup</div><div class="step-content">Create operator with is_active = false</div></div>
+                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in</div></div>
+                    <div class="step"><div class="step-label">expected</div><div class="step-content">Their slots excluded from get_available_slots</div></div>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn pass" data-status="pass">pass</button>
+                    <button class="status-btn fail" data-status="fail">fail</button>
+                    <button class="status-btn skip" data-status="skip">skip</button>
+                </div>
+                <div class="notes-toggle">+ notes</div>
+                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
+            </div>
+        </section>
+        <section data-section="E">
+            <div class="section-header">
+                <div class="section-title">Section E: Session Metadata</div>
+                <div class="section-progress"></div>
+            </div>
+            <div class="session-notes">
+                <div class="field-group">
+                    <label>tester</label>
+                    <input type="text" id="tester-name" placeholder="adam">
+                </div>
+                <div class="field-group">
+                    <label>environment</label>
+                    <input type="text" id="environment" placeholder="dev | staging | prod — twilio: +1...">
+                </div>
+                <div class="field-group">
+                    <label>blockers</label>
+                    <textarea id="blockers" placeholder="// blocking issues..."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>v2_backlog</label>
+                    <textarea id="v2-backlog" placeholder="// future features..."></textarea>
+                </div>
+            </div>
+        </section>
+        <div class="terminal-footer">
+            <div><span class="cmd">$</span> ./qa_checklist.sh <span class="path">--mode=interactive</span></div>
+            <div>pid: <span id="session-pid">0000</span></div>
+        </div>
+    </div>
+</div>
+<script>
+const STORAGE_KEY = 'roofsig-qa-v2';
+document.getElementById('session-pid').textContent = Math.floor(Math.random() * 9000 + 1000);
+let state = { scenarios: {}, sessionNotes: { tester: '', environment: '', blockers: '', v2Backlog: '' }, lastUpdated: null };
 
-  <script>
-    const STORAGE_KEY = 'roofsig_qa_checklist_v2';
+function loadState() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) { try { state = { ...state, ...JSON.parse(saved) }; } catch (e) {} }
+    applyState();
+}
 
-    function toggle(el) {
-      el.classList.toggle('checked');
-      updateProgress();
-      updateTimestamp();
-      saveState();
-    }
-
-    function updateProgress() {
-      const total = document.querySelectorAll('.checkbox').length;
-      const checked = document.querySelectorAll('.checkbox.checked').length;
-      const percent = (checked / total) * 100;
-      
-      document.getElementById('progressFill').style.width = percent + '%';
-      document.getElementById('progressText').textContent = checked + ' / ' + total;
-    }
-
-    function updateTimestamp() {
-      const now = new Date();
-      const timestamp = now.toLocaleString();
-      document.getElementById('timestamp').textContent = 'Last updated: ' + timestamp;
-      localStorage.setItem(STORAGE_KEY + '_timestamp', timestamp);
-    }
-
-    function saveState() {
-      const checkboxes = document.querySelectorAll('.checkbox');
-      const state = Array.from(checkboxes).map(cb => cb.classList.contains('checked'));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    function loadState() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const savedTimestamp = localStorage.getItem(STORAGE_KEY + '_timestamp');
-      
-      if (saved) {
-        const state = JSON.parse(saved);
-        const checkboxes = document.querySelectorAll('.checkbox');
-        checkboxes.forEach((cb, i) => {
-          if (state[i]) cb.classList.add('checked');
-        });
-      }
-      
-      if (savedTimestamp) {
-        document.getElementById('timestamp').textContent = 'Last updated: ' + savedTimestamp;
-      }
-    }
-
-    // Initialize
-    loadState();
+function saveState() {
+    state.lastUpdated = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateTimestamp();
     updateProgress();
-  </script>
+}
+
+function applyState() {
+    document.querySelectorAll('.scenario[data-id]').forEach(scenario => {
+        const id = scenario.dataset.id;
+        const data = state.scenarios[id] || {};
+        const checkbox = scenario.querySelector('.scenario-checkbox');
+        const textarea = scenario.querySelector('.notes-area textarea');
+        if (checkbox) checkbox.checked = data.checked || false;
+        if (textarea) textarea.value = data.notes || '';
+        scenario.classList.remove('completed', 'failed', 'skipped');
+        if (data.status === 'pass') scenario.classList.add('completed');
+        if (data.status === 'fail') scenario.classList.add('failed');
+        if (data.status === 'skip') scenario.classList.add('skipped');
+        scenario.querySelectorAll('.status-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.status === data.status);
+        });
+        const notesArea = scenario.querySelector('.notes-area');
+        const notesToggle = scenario.querySelector('.notes-toggle');
+        if (data.notes && notesArea) {
+            notesArea.classList.add('open');
+            if (notesToggle) notesToggle.textContent = '− notes';
+        }
+    });
+    document.getElementById('tester-name').value = state.sessionNotes.tester || '';
+    document.getElementById('environment').value = state.sessionNotes.environment || '';
+    document.getElementById('blockers').value = state.sessionNotes.blockers || '';
+    document.getElementById('v2-backlog').value = state.sessionNotes.v2Backlog || '';
+    updateTimestamp();
+    updateProgress();
+}
+
+function updateTimestamp() {
+    const el = document.getElementById('last-updated');
+    el.textContent = state.lastUpdated ? state.lastUpdated.replace('T', ' ').slice(0, 19) : 'null';
+}
+
+function updateProgress() {
+    const scenarios = document.querySelectorAll('.scenario[data-id]');
+    const total = scenarios.length;
+    let pass = 0, fail = 0, skip = 0, pending = 0;
+    scenarios.forEach(s => {
+        const data = state.scenarios[s.dataset.id] || {};
+        if (data.status === 'pass') pass++;
+        else if (data.status === 'fail') fail++;
+        else if (data.status === 'skip') skip++;
+        else pending++;
+    });
+    const completed = pass + fail + skip;
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    document.getElementById('progress-pct').textContent = pct;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('stat-pass').textContent = pass;
+    document.getElementById('stat-fail').textContent = fail;
+    document.getElementById('stat-skip').textContent = skip;
+    document.getElementById('stat-pending').textContent = pending;
+    document.getElementById('total-scenarios').textContent = total;
+    document.querySelectorAll('[data-section]').forEach(section => {
+        const sectionId = section.dataset.section;
+        const sectionScenarios = section.querySelectorAll('.scenario[data-id]');
+        let sectionComplete = 0;
+        sectionScenarios.forEach(s => { if (state.scenarios[s.dataset.id]?.status) sectionComplete++; });
+        const doneEl = document.querySelector(`[data-section-done="${sectionId}"]`);
+        const totalEl = document.querySelector(`[data-section-total="${sectionId}"]`);
+        if (doneEl) doneEl.textContent = sectionComplete;
+        if (totalEl) totalEl.textContent = sectionScenarios.length;
+    });
+}
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('Reset all progress?')) {
+        state = { scenarios: {}, sessionNotes: { tester: '', environment: '', blockers: '', v2Backlog: '' }, lastUpdated: null };
+        saveState(); applyState();
+    }
+});
+
+document.getElementById('export-btn').addEventListener('click', () => {
+    const scenarios = document.querySelectorAll('.scenario[data-id]');
+    let report = `# RoofSig QA Report\n# Generated: ${new Date().toISOString()}\n# Tester: ${state.sessionNotes.tester || 'N/A'}\n# Environment: ${state.sessionNotes.environment || 'N/A'}\n\n`;
+    let pass = 0, fail = 0, skip = 0;
+    scenarios.forEach(s => {
+        const data = state.scenarios[s.dataset.id] || {};
+        if (data.status === 'pass') pass++;
+        if (data.status === 'fail') fail++;
+        if (data.status === 'skip') skip++;
+    });
+    report += `## Summary\nPASS: ${pass} | FAIL: ${fail} | SKIP: ${skip} | TOTAL: ${scenarios.length}\n\n## Results\n\n`;
+    scenarios.forEach(scenario => {
+        const id = scenario.dataset.id;
+        const title = scenario.querySelector('.scenario-title').textContent;
+        const data = state.scenarios[id] || {};
+        report += `### ${title}\nstatus: ${(data.status || 'PENDING').toUpperCase()}\n`;
+        if (data.notes) report += `notes: ${data.notes}\n`;
+        report += `\n`;
+    });
+    if (state.sessionNotes.blockers) report += `## Blockers\n${state.sessionNotes.blockers}\n\n`;
+    if (state.sessionNotes.v2Backlog) report += `## V2 Backlog\n${state.sessionNotes.v2Backlog}\n`;
+    const blob = new Blob([report], { type: 'text/markdown' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `roofsig-qa-${new Date().toISOString().split('T')[0]}.md`;
+    a.click();
+});
+
+document.querySelectorAll('.scenario-checkbox').forEach(cb => {
+    cb.addEventListener('change', e => {
+        const id = e.target.dataset.id;
+        if (!state.scenarios[id]) state.scenarios[id] = {};
+        state.scenarios[id].checked = e.target.checked;
+        if (e.target.checked && !state.scenarios[id].status) state.scenarios[id].status = 'pass';
+        saveState(); applyState();
+    });
+});
+
+document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+        const scenario = e.target.closest('.scenario');
+        const id = scenario.dataset.id;
+        if (!state.scenarios[id]) state.scenarios[id] = {};
+        state.scenarios[id].status = e.target.dataset.status;
+        state.scenarios[id].checked = true;
+        saveState(); applyState();
+    });
+});
+
+document.querySelectorAll('.notes-toggle').forEach(toggle => {
+    toggle.addEventListener('click', e => {
+        const notesArea = e.target.nextElementSibling;
+        notesArea.classList.toggle('open');
+        e.target.textContent = notesArea.classList.contains('open') ? '− notes' : '+ notes';
+    });
+});
+
+document.querySelectorAll('.notes-area textarea').forEach(textarea => {
+    textarea.addEventListener('input', e => {
+        const id = e.target.closest('.scenario').dataset.id;
+        if (!state.scenarios[id]) state.scenarios[id] = {};
+        state.scenarios[id].notes = e.target.value;
+        saveState();
+    });
+});
+
+['tester-name', 'environment', 'blockers', 'v2-backlog'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', e => {
+        const key = { 'tester-name': 'tester', 'environment': 'environment', 'blockers': 'blockers', 'v2-backlog': 'v2Backlog' }[id];
+        state.sessionNotes[key] = e.target.value;
+        saveState();
+    });
+});
+
+loadState();
+</script>
 </body>
 </html>
