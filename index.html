@@ -1,1026 +1,973 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoofSig QA Checklist</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #121314;
-            --bg-alt: #1A1C1E;
-            --bg-highlight: #2B2F33;
-            --fg: #D6D3C9;
-            --fg-dim: #A9A399;
-            --fg-bright: #EEE8DD;
-            --black: #1A1C1E;
-            --red: #C56A73;
-            --green: #93B89A;
-            --yellow: #D0B07A;
-            --blue: #7FA7C8;
-            --magenta: #B492C7;
-            --cyan: #79B6B1;
-            --white: #D6D3C9;
-            --br-black: #2B2F33;
-            --br-red: #D47D86;
-            --br-green: #A6C9AC;
-            --br-yellow: #DFC18C;
-            --br-blue: #92B8D6;
-            --br-magenta: #C3A4D3;
-            --br-cyan: #8BC7C2;
-            --br-white: #EEE8DD;
-            --dim-red: #8E4B53;
-            --dim-green: #6E8B74;
-            --dim-yellow: #8F7752;
-            --dim-blue: #5A768A;
-            --dim-magenta: #7B6488;
-            --dim-cyan: #557F7B;
-            --selection: #3B4148;
-            
-            /* Font size hierarchy */
-            --font-xs: 11px;
-            --font-sm: 13px;
-            --font-base: 15px;
-            --font-lg: 17px;
-            --font-xl: 20px;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: var(--font-base);
-            background: var(--bg);
-            color: var(--fg);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        .terminal-frame {
-            border: 1px solid var(--bg-highlight);
-            background: var(--bg);
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .terminal-titlebar {
-            background: var(--bg-alt);
-            padding: 8px 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--bg-highlight);
-        }
-        .terminal-dots { display: flex; gap: 8px; }
-        .terminal-dot { width: 14px; height: 14px; border-radius: 50%; }
-        .dot-red { background: var(--red); }
-        .dot-yellow { background: var(--yellow); }
-        .dot-green { background: var(--green); }
-        .terminal-title { flex: 1; text-align: center; color: var(--fg-dim); font-size: var(--font-sm); }
-        .terminal-content { padding: 20px; }
-        header { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--bg-highlight); }
-        .ascii-title { color: var(--cyan); font-size: var(--font-xs); line-height: 1.1; margin-bottom: 12px; white-space: pre; }
-        .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .version-tag { color: var(--fg-dim); font-size: var(--font-sm); }
-        .version-tag span { color: var(--yellow); }
-        .controls { display: flex; gap: 10px; }
-        button {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: var(--font-sm);
-            padding: 6px 14px;
-            background: var(--bg-alt);
-            color: var(--fg);
-            border: 1px solid var(--bg-highlight);
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        button:hover { background: var(--bg-highlight); border-color: var(--fg-dim); }
-        button.danger:hover { border-color: var(--red); color: var(--red); }
-        .summary {
-            background: var(--bg-alt);
-            border: 1px solid var(--bg-highlight);
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .summary-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            color: var(--fg-dim);
-            font-size: var(--font-sm);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .summary-header .label { color: var(--cyan); font-size: var(--font-base); }
-        .progress-container { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-        .progress-bar {
-            flex: 1;
-            height: 20px;
-            background: var(--bg);
-            border: 1px solid var(--bg-highlight);
-            position: relative;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--dim-green), var(--green));
-            transition: width 0.3s ease;
-        }
-        .progress-text { color: var(--br-green); min-width: 60px; text-align: right; font-size: var(--font-lg); font-weight: 600; }
-        .stats-row { display: flex; gap: 28px; flex-wrap: wrap; }
-        .stat { display: flex; align-items: center; gap: 8px; font-size: var(--font-base); }
-        .stat-box { width: 10px; height: 10px; }
-        .stat-box.pass { background: var(--green); }
-        .stat-box.fail { background: var(--red); }
-        .stat-box.skip { background: var(--yellow); }
-        .stat-box.pending { background: var(--bg-highlight); border: 1px solid var(--fg-dim); }
-        .stat-label { color: var(--fg-dim); }
-        .stat-value { color: var(--fg); font-weight: 500; }
-        .stat-value.pass { color: var(--green); }
-        .stat-value.fail { color: var(--red); }
-        .stat-value.skip { color: var(--yellow); }
-        .timestamp { color: var(--fg-dim); font-size: var(--font-sm); margin-top: 10px; }
-        .timestamp span { color: var(--blue); }
-        .sql-block {
-            background: var(--bg-alt);
-            border: 1px solid var(--bg-highlight);
-            border-left: 3px solid var(--magenta);
-            padding: 14px;
-            margin-bottom: 20px;
-            font-size: var(--font-sm);
-            overflow-x: auto;
-        }
-        .sql-block .title { color: var(--magenta); margin-bottom: 10px; font-size: var(--font-base); }
-        .sql-block pre { margin: 0; color: var(--fg-dim); white-space: pre-wrap; line-height: 1.5; }
-        .sql-block .kw { color: var(--magenta); }
-        .sql-block .tbl { color: var(--cyan); }
-        .sql-block .str { color: var(--yellow); }
-        section { margin-bottom: 24px; }
-        .section-header {
-            background: var(--bg-alt);
-            border: 1px solid var(--bg-highlight);
-            padding: 10px 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1px;
-        }
-        .section-title { color: var(--cyan); font-size: var(--font-lg); font-weight: 600; }
-        .section-title::before { content: '┌─ '; color: var(--bg-highlight); }
-        .section-progress { color: var(--fg-dim); font-size: var(--font-sm); }
-        .section-progress .done { color: var(--green); }
-        .scenario {
-            background: var(--bg-alt);
-            border: 1px solid var(--bg-highlight);
-            border-top: none;
-            padding: 14px 14px 14px 24px;
-            position: relative;
-        }
-        .scenario::before {
-            content: '│';
-            position: absolute;
-            left: 8px;
-            top: 14px;
-            color: var(--bg-highlight);
-        }
-        .scenario:last-of-type::before { content: '└'; }
-        .scenario-header { display: flex; gap: 14px; align-items: flex-start; }
-        .scenario-checkbox {
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border: 1px solid var(--fg-dim);
-            background: var(--bg);
-            cursor: pointer;
-            position: relative;
-            flex-shrink: 0;
-            margin-top: 3px;
-        }
-        .scenario-checkbox:checked { border-color: var(--green); }
-        .scenario-checkbox:checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--green);
-            font-size: var(--font-base);
-        }
-        .scenario-title { color: var(--fg); font-weight: 600; font-size: var(--font-base); }
-        .scenario-title .num { color: var(--yellow); }
-        .scenario-content { margin-left: 34px; margin-top: 10px; font-size: var(--font-sm); }
-        .step { margin-bottom: 8px; padding-left: 14px; border-left: 1px solid var(--bg-highlight); }
-        .step-label { color: var(--blue); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
-        .step-content { color: var(--fg-dim); font-size: var(--font-sm); line-height: 1.5; }
-        .db-check {
-            background: var(--bg);
-            border: 1px solid var(--bg-highlight);
-            border-left: 2px solid var(--cyan);
-            padding: 10px 14px;
-            margin: 10px 0;
-            font-size: var(--font-sm);
-        }
-        .db-check .title { color: var(--cyan); margin-bottom: 6px; font-size: var(--font-sm); font-weight: 500; }
-        .db-check .item { color: var(--fg-dim); line-height: 1.6; }
-        .db-check .fld { color: var(--magenta); }
-        .db-check .val { color: var(--yellow); }
-        .tip {
-            background: var(--bg);
-            border: 1px solid var(--yellow);
-            border-left: 2px solid var(--yellow);
-            padding: 10px 14px;
-            margin: 10px 0;
-            color: var(--yellow);
-            font-size: var(--font-sm);
-        }
-        .tip::before { content: '⚠ '; }
-        .status-buttons { display: flex; gap: 8px; margin-top: 12px; margin-left: 34px; }
-        .status-btn {
-            font-size: var(--font-sm);
-            padding: 5px 14px;
-            background: transparent;
-            border: 1px solid var(--bg-highlight);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .status-btn.pass { color: var(--dim-green); border-color: var(--dim-green); }
-        .status-btn.fail { color: var(--dim-red); border-color: var(--dim-red); }
-        .status-btn.skip { color: var(--dim-yellow); border-color: var(--dim-yellow); }
-        .status-btn.pass:hover, .status-btn.active.pass { background: var(--green); color: var(--bg); border-color: var(--green); }
-        .status-btn.fail:hover, .status-btn.active.fail { background: var(--red); color: var(--bg); border-color: var(--red); }
-        .status-btn.skip:hover, .status-btn.active.skip { background: var(--yellow); color: var(--bg); border-color: var(--yellow); }
-        .scenario.completed { opacity: 0.5; }
-        .scenario.completed .scenario-title { text-decoration: line-through; color: var(--fg-dim); }
-        .scenario.failed { border-left: 2px solid var(--red); }
-        .scenario.skipped { border-left: 2px solid var(--yellow); }
-        .notes-toggle { font-size: var(--font-sm); color: var(--fg-dim); cursor: pointer; margin-top: 10px; margin-left: 34px; }
-        .notes-toggle:hover { color: var(--fg); }
-        .notes-area { display: none; margin-top: 10px; margin-left: 34px; }
-        .notes-area.open { display: block; }
-        .notes-area textarea {
-            width: 100%;
-            min-height: 70px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: var(--font-sm);
-            padding: 10px;
-            background: var(--bg);
-            color: var(--fg);
-            border: 1px solid var(--bg-highlight);
-            resize: vertical;
-        }
-        .notes-area textarea:focus { outline: none; border-color: var(--cyan); }
-        .session-notes { background: var(--bg-alt); border: 1px solid var(--bg-highlight); padding: 14px; }
-        .session-notes .field-group { margin-bottom: 14px; }
-        .session-notes label {
-            display: block;
-            color: var(--blue);
-            font-size: var(--font-xs);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-        .session-notes input, .session-notes textarea {
-            width: 100%;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: var(--font-sm);
-            padding: 10px;
-            background: var(--bg);
-            color: var(--fg);
-            border: 1px solid var(--bg-highlight);
-        }
-        .session-notes textarea { min-height: 70px; resize: vertical; }
-        .session-notes input:focus, .session-notes textarea:focus { outline: none; border-color: var(--cyan); }
-        .terminal-footer {
-            margin-top: 20px;
-            padding-top: 14px;
-            border-top: 1px solid var(--bg-highlight);
-            display: flex;
-            justify-content: space-between;
-            color: var(--fg-dim);
-            font-size: var(--font-sm);
-        }
-        .terminal-footer .cmd { color: var(--green); }
-        .terminal-footer .path { color: var(--blue); }
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--bg-highlight); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--fg-dim); }
-        @media (max-width: 600px) {
-            body { padding: 10px; }
-            :root { --font-base: 14px; --font-lg: 16px; --font-xl: 18px; }
-            .ascii-title { display: none; }
-            .stats-row { gap: 14px; }
-            .terminal-content { padding: 14px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROOFSIG QA MATRIX v2.2.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --amber-black:      oklch(0.06 0.012 75);
+    --amber-ghost:      oklch(0.20 0.035 75);
+    --amber-decay:      oklch(0.42 0.085 75);
+    --amber-sustained:  oklch(0.72 0.145 75);
+    --amber-excitation: oklch(0.88 0.170 75);
+    --green-ghost:      oklch(0.20 0.060 142);
+    --green-decay:      oklch(0.42 0.130 142);
+    --green-sustained:  oklch(0.72 0.220 142);
+    --green-excitation: oklch(0.88 0.270 142);
+    --red-ghost:        oklch(0.15 0.040 28);
+    --red-decay:        oklch(0.35 0.090 28);
+    --red-sustained:    oklch(0.57 0.180 28);
+    --red-excitation:   oklch(0.68 0.230 28);
+  }
+
+  html, body {
+    background: var(--amber-black);
+    color: var(--amber-excitation);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  a { color: var(--amber-sustained); }
+
+  /* ---- LAYOUT ---- */
+  .shell {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 0 40px;
+  }
+
+  /* ---- HEADER / STATUS BAR ---- */
+  .status-bar {
+    background: var(--amber-sustained);
+    color: var(--amber-black);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .status-bar .title { font-size: 16px; font-weight: 600; letter-spacing: 0.1em; }
+
+  .status-bar .right { display: flex; align-items: center; gap: 16px; }
+
+  .progress-label { font-size: 13px; font-weight: 500; }
+
+  .btn-reset {
+    background: var(--amber-black);
+    color: var(--amber-excitation);
+    border: 1px solid var(--amber-excitation);
+    padding: 2px 10px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .btn-reset:hover { background: var(--amber-ghost); }
+
+  /* ---- SECTION ---- */
+  .section { border-bottom: 1px solid var(--amber-ghost); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--amber-ghost);
+    user-select: none;
+  }
+  .section-header:hover { background: oklch(0.09 0.015 75); }
+
+  .section-header .sec-title {
+    color: var(--amber-sustained);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .section-header .sec-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--amber-sustained);
+  }
+
+  .sec-progress { font-size: 13px; color: var(--amber-excitation); }
+
+  .collapse-indicator {
+    color: var(--amber-sustained);
+    font-size: 11px;
+    font-weight: 600;
+    transition: none;
+  }
+
+  /* ---- DIRECTIONS ---- */
+  .directions-block {
+    display: none;
+    background: oklch(0.09 0.015 75);
+    border-bottom: 1px solid var(--amber-ghost);
+    padding: 12px 16px 12px 32px;
+    color: var(--amber-sustained);
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+  .directions-block.open { display: block; }
+
+  .directions-label {
+    color: var(--amber-excitation);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* ---- ROWS ---- */
+  .rows-block { display: none; }
+  .rows-block.open { display: block; }
+
+  .test-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--amber-ghost);
+    cursor: pointer;
+    user-select: none;
+    min-height: 36px;
+  }
+  .test-row:hover { background: oklch(0.09 0.015 75); }
+
+  /* state colors */
+  .test-row.state-pending .row-id   { color: var(--amber-excitation); }
+  .test-row.state-pending .row-text { color: var(--amber-excitation); }
+  .test-row.state-pending .row-badge { color: var(--amber-sustained); border-color: var(--amber-sustained); }
+
+  .test-row.state-pass .row-id   { color: var(--green-excitation); }
+  .test-row.state-pass .row-text { color: var(--green-excitation); }
+  .test-row.state-pass .row-badge { color: var(--green-excitation); border-color: var(--green-excitation); background: var(--green-ghost); }
+
+  .test-row.state-skip .row-id   { color: var(--amber-sustained); text-decoration: line-through; opacity: 0.5; }
+  .test-row.state-skip .row-text { color: var(--amber-sustained); text-decoration: line-through; opacity: 0.5; }
+  .test-row.state-skip .row-badge { color: var(--amber-sustained); border-color: var(--amber-sustained); opacity: 0.5; }
+
+  .row-badge {
+    flex-shrink: 0;
+    min-width: 52px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border: 1px solid;
+    padding: 0 4px;
+    line-height: 18px;
+    text-transform: uppercase;
+  }
+
+  .row-id {
+    flex-shrink: 0;
+    min-width: 42px;
+    font-size: 14px;
+    font-weight: 600;
+    padding-top: 1px;
+  }
+
+  .row-content { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .row-text { font-size: 15px; }
+  .row-verify { font-size: 13px; color: var(--amber-sustained); }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    padding: 8px 16px;
+    font-size: 11px;
+    color: var(--amber-decay);
+    letter-spacing: 0.06em;
+    border-top: 1px solid var(--amber-ghost);
+    margin-top: 16px;
+  }
+
+  /* ---- PROGRESS BAR ---- */
+  .progress-bar-wrap {
+    height: 2px;
+    background: var(--amber-ghost);
+    width: 100%;
+  }
+  .progress-bar-fill {
+    height: 2px;
+    background: var(--green-sustained);
+    transition: width 0.2s;
+    width: 0%;
+  }
+</style>
 </head>
 <body>
-<div class="terminal-frame">
-    <div class="terminal-titlebar">
-        <div class="terminal-dots">
-            <div class="terminal-dot dot-red"></div>
-            <div class="terminal-dot dot-yellow"></div>
-            <div class="terminal-dot dot-green"></div>
-        </div>
-        <div class="terminal-title">roofsig-qa — ~/qa/checklist.sh</div>
-        <div class="controls">
-            <button id="reset-btn" class="danger">[R]eset</button>
-            <button id="export-btn">[E]xport</button>
-        </div>
+<div class="shell">
+  <div class="status-bar">
+    <span class="title">ROOFSIG QA MATRIX v2.2.1</span>
+    <div class="right">
+      <span class="progress-label" id="progress-label">PROGRESS: 0/0 (0%)</span>
+      <button class="btn-reset" id="btn-reset">[RESET]</button>
     </div>
-    <div class="terminal-content">
-        <header>
-            <pre class="ascii-title">╦═╗╔═╗╔═╗╔═╗╔═╗╦╔═╗  ╔═╗ ╔═╗
-╠╦╝║ ║║ ║╠╣ ╚═╗║║ ╦  ║═╬╗╠═╣
-╩╚═╚═╝╚═╝╚  ╚═╝╩╚═╝  ╚═╝╚╩ ╩</pre>
-            <div class="header-row">
-                <div class="version-tag">version <span>WF-01</span> | workflow validation suite</div>
-            </div>
-        </header>
-        <div class="summary">
-            <div class="summary-header">
-                <span class="label">┌─ progress ─┐</span>
-                <span>scenarios: <span id="total-scenarios">19</span></span>
-            </div>
-            <div class="progress-container">
-                <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 0%"></div></div>
-                <div class="progress-text"><span id="progress-pct">0</span>%</div>
-            </div>
-            <div class="stats-row">
-                <div class="stat"><div class="stat-box pass"></div><span class="stat-label">pass:</span><span class="stat-value pass" id="stat-pass">0</span></div>
-                <div class="stat"><div class="stat-box fail"></div><span class="stat-label">fail:</span><span class="stat-value fail" id="stat-fail">0</span></div>
-                <div class="stat"><div class="stat-box skip"></div><span class="stat-label">skip:</span><span class="stat-value skip" id="stat-skip">0</span></div>
-                <div class="stat"><div class="stat-box pending"></div><span class="stat-label">pending:</span><span class="stat-value" id="stat-pending">19</span></div>
-            </div>
-            <div class="timestamp">last_updated: <span id="last-updated">null</span></div>
-        </div>
-        <div class="sql-block">
-            <div class="title">/* SOFT_RESET.sql — run between scenarios unless noted */</div>
-            <pre><span class="kw">DELETE FROM</span> <span class="tbl">appointments</span> <span class="kw">WHERE</span> lead_id <span class="kw">IN</span> (<span class="kw">SELECT</span> id <span class="kw">FROM</span> <span class="tbl">leads</span> <span class="kw">WHERE</span> phone = <span class="str">'YOUR_TEST_PHONE'</span>);
-<span class="kw">DELETE FROM</span> <span class="tbl">callback_tasks</span> <span class="kw">WHERE</span> lead_id <span class="kw">IN</span> (<span class="kw">SELECT</span> id <span class="kw">FROM</span> <span class="tbl">leads</span> <span class="kw">WHERE</span> phone = <span class="str">'YOUR_TEST_PHONE'</span>);
-<span class="kw">UPDATE</span> <span class="tbl">leads</span> <span class="kw">SET</span> stage = <span class="str">'new'</span>, last_event_at = <span class="kw">NULL WHERE</span> phone = <span class="str">'YOUR_TEST_PHONE'</span>;
-<span class="kw">UPDATE</span> <span class="tbl">operator_appointment_slots</span> <span class="kw">SET</span> status = <span class="str">'available'</span> <span class="kw">WHERE</span> status = <span class="str">'booked'</span> <span class="kw">AND</span> appointment_id <span class="kw">IS NULL</span>;</pre>
-        </div>
-        <section data-section="A">
-            <div class="section-header">
-                <div class="section-title">Section A: Basic Functionality</div>
-                <div class="section-progress"><span class="done" data-section-done="A">0</span>/<span data-section-total="A">6</span></div>
-            </div>
-            <div class="scenario" data-id="1">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="1">
-                    <div class="scenario-title"><span class="num">01</span> Happy Path (New Lead, Business Hours)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Ensure business_hours in roofers table covers current time</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call the RoofSig number</div></div>
-                    <div class="step"><div class="step-label">voice_check</div><div class="step-content">Hear greeting → Press 1 (SMS Booking)</div></div>
-                    <div class="step"><div class="step-label">sms_check</div><div class="step-content">Receive "Here are available times..." text</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "1"</div></div>
-                    <div class="step"><div class="step-label">sms_check</div><div class="step-content">Receive "Confirmed... reply with address."</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "123 Test St, Austin, TX 78701"</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB VERIFICATION</div>
-                        <div class="item">→ <span class="tbl">leads</span>: <span class="fld">stage</span> = <span class="val">'qualified'</span>, <span class="fld">zip_code</span> = <span class="val">'78701'</span></div>
-                        <div class="item">→ <span class="tbl">appointments</span>: row exists, <span class="fld">status</span> = <span class="val">'scheduled'</span>, address populated</div>
-                        <div class="item">→ <span class="tbl">operator_appointment_slots</span>: slot status → <span class="val">'booked'</span></div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="2">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="2">
-                    <div class="scenario-title"><span class="num">02</span> After Hours Logic</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Update roofers.business_hours so current time is CLOSED</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call the number</div></div>
-                    <div class="step"><div class="step-label">voice_check</div><div class="step-content">Hear "Our office is closed..." → Beep</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Leave voicemail: "I have a leak." Hang up.</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB VERIFICATION</div>
-                        <div class="item">→ <span class="tbl">call_events</span>: <span class="fld">bucket</span> = <span class="val">'after_hours'</span></div>
-                        <div class="item">→ <span class="tbl">callback_tasks</span>: new row, <span class="fld">status</span> = <span class="val">'pending'</span></div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="3">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="3">
-                    <div class="scenario-title"><span class="num">03</span> Existing Client Recognition</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="tip">Do NOT run Soft Reset. Continue from Scenario 1</div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call the number</div></div>
-                    <div class="step"><div class="step-label">voice_check</div><div class="step-content">Hear "Welcome back... Press 2 to leave a message"</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Press 2 → Leave voicemail "I need to reschedule."</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB VERIFICATION</div>
-                        <div class="item">→ <span class="tbl">call_events</span>: <span class="fld">bucket</span> = <span class="val">'voicemail'</span></div>
-                        <div class="item">→ <span class="tbl">transcripts</span>: row with <span class="fld">channel</span> = <span class="val">'appointment_update'</span></div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="4">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="4">
-                    <div class="scenario-title"><span class="num">04</span> Storm Mode (The Radar)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Run activate_storm_mode function. Ensure location matches zip.</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call the number</div></div>
-                    <div class="step"><div class="step-label">voice_check</div><div class="step-content">Hear "Storm Response... Press 1 for active leak."</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Press 1 → Say: "My roof is gone in 78701."</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB VERIFICATION</div>
-                        <div class="item">→ <span class="tbl">leads</span>: <span class="fld">tags</span> contains <span class="val">['storm', 'emergency']</span></div>
-                        <div class="item">→ <span class="tbl">storm_events</span>: <span class="fld">calls_received</span> incremented</div>
-                    </div>
-                    <div class="db-check">
-                        <div class="title">// WORKFLOW VERIFICATION</div>
-                        <div class="item">→ Check n8n Executions — Did Sector Check run?</div>
-                        <div class="item">→ Did Targeting Switch route correctly?</div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="5">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="5">
-                    <div class="scenario-title"><span class="num">05</span> Botched Address (Error Handling)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Soft Reset. Get to "Reply with address" stage.</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "No"</div></div>
-                    <div class="step"><div class="step-label">sms_check</div><div class="step-content">Receive "Invalid address" or "Human review needed"</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB VERIFICATION</div>
-                        <div class="item">→ <span class="tbl">callback_tasks</span>: row created for human review</div>
-                        <div class="item">→ <span class="tbl">appointments</span>: address should NOT be "No"</div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="6">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="6">
-                    <div class="scenario-title"><span class="num">06</span> The Opt-Out</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Any stage</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "STOP"</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB VERIFICATION</div>
-                        <div class="item">→ <span class="tbl">leads</span>: <span class="fld">consent_sms</span> = <span class="val">false</span>, <span class="fld">stage</span> = <span class="val">'unresponsive'</span></div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-        </section>
-        <section data-section="B">
-            <div class="section-header">
-                <div class="section-title">Section B: Capacity & Concurrency</div>
-                <div class="section-progress"><span class="done" data-section-done="B">0</span>/<span data-section-total="B">3</span></div>
-            </div>
-            <div class="scenario" data-id="7">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="7">
-                    <div class="scenario-title"><span class="num">07</span> Sold Out Slot</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">setup</div><div class="step-content">Use "Busy Morning" script to fully book first slot</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in → Press 1 for SMS</div></div>
-                    <div class="step"><div class="step-label">expected</div><div class="step-content">SMS list starts at second slot. Booked slot invisible.</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB CHECK</div>
-                        <div class="item">→ <span class="tbl">operator_appointment_slots</span> all <span class="fld">status</span>=<span class="val">'booked'</span></div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="8">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="8">
-                    <div class="scenario-title"><span class="num">08</span> Last Seat Booking</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">setup</div><div class="step-content">Set max_concurrent_appointments = 3. Book 2 via SQL.</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in → Book that time</div></div>
-                    <div class="step"><div class="step-label">expected</div><div class="step-content">System accepts it</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB CHECK</div>
-                        <div class="item">→ Lead assigned to third operator. Available count = 0.</div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="9">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="9">
-                    <div class="scenario-title"><span class="num">09</span> Zero Inventory</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">setup</div><div class="step-content">Update ALL slots for 7 days to blocked/booked</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in → Press 1</div></div>
-                    <div class="step"><div class="step-label">expected</div><div class="step-content">"We are fully booked, we will call you" fallback</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB CHECK</div>
-                        <div class="item">→ No error logs in <span class="tbl">timeline_events</span></div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-        </section>
-        <section data-section="C">
-            <div class="section-header">
-                <div class="section-title">Section C: User Behavior (Chaos)</div>
-                <div class="section-progress"><span class="done" data-section-done="C">0</span>/<span data-section-total="C">4</span></div>
-            </div>
-            <div class="scenario" data-id="10">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="10">
-                    <div class="scenario-title"><span class="num">10</span> The Ghost (Abandonment)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call → Get SMS → Reply "1" → Receive "Send Address"</div></div>
-                    <div class="step"><div class="step-label">behavior</div><div class="step-content">Stop replying. Do not send address.</div></div>
-                    <div class="step"><div class="step-label">wait</div><div class="step-content">24 hours (simulate)</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB CHECK</div>
-                        <div class="item">→ <span class="tbl">appointments</span> exists, <span class="fld">address</span> = <span class="val">NULL</span></div>
-                        <div class="item">→ <span class="fld">status</span> = <span class="val">'scheduled'</span> (holding slot)</div>
-                    </div>
-                    <div class="tip">V2 TODO: Auto-release slots with no address after 24h</div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="11">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="11">
-                    <div class="scenario-title"><span class="num">11</span> Fat Finger (Invalid Inputs)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">prompt</div><div class="step-content">"Reply 1, 2, or 3"</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "4" or "Yes"</div></div>
-                    <div class="step"><div class="step-label">expected</div><div class="step-content">"Invalid option" SMS or fallback to human</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB CHECK</div>
-                        <div class="item">→ <span class="tbl">callback_tasks</span> created if human fallback</div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="12">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="12">
-                    <div class="scenario-title"><span class="num">12</span> Talkative User (Regex)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">prompt</div><div class="step-content">"Reply 1, 2, or 3"</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "I'll take number 1 thanks"</div></div>
-                    <div class="step"><div class="step-label">expected_smart</div><div class="step-content">Parses "1"</div></div>
-                    <div class="step"><div class="step-label">expected_strict</div><div class="step-content">Sends to human review</div></div>
-                    <div class="tip">Current logic likely sends to human review. Verify.</div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="13">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="13">
-                    <div class="scenario-title"><span class="num">13</span> Double Tap (Idempotency)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Reply "1". Wait 2s. Reply "1" again.</div></div>
-                    <div class="step"><div class="step-label">expected</div><div class="step-content">First: books. Second: "Already scheduled" or ignored.</div></div>
-                    <div class="tip">FAILURE STATE: Books two slots for same lead</div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-        </section>
-        <section data-section="D">
-            <div class="section-header">
-                <div class="section-title">Section D: Operator Logic</div>
-                <div class="section-progress"><span class="done" data-section-done="D">0</span>/<span data-section-total="D">2</span></div>
-            </div>
-            <div class="scenario" data-id="14">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="14">
-                    <div class="scenario-title"><span class="num">14</span> Sick Day (Operator Block)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">setup</div><div class="step-content">Run sre_block_operator(roofer_id, operator_id, time_range)</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in</div></div>
-                    <div class="step"><div class="step-label">expected</div><div class="step-content">System does NOT offer Operator A slots</div></div>
-                    <div class="db-check">
-                        <div class="title">// DB CHECK</div>
-                        <div class="item">→ <span class="tbl">operator_appointment_slots</span> <span class="fld">status</span> = <span class="val">'blocked'</span></div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="15">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="15">
-                    <div class="scenario-title"><span class="num">15</span> Lazy Operator (Availability)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">setup</div><div class="step-content">Create operator with is_active = false</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Call in</div></div>
-                    <div class="step"><div class="step-label">expected</div><div class="step-content">Their slots excluded from get_available_slots</div></div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-        </section>
-        <section data-section="E">
-            <div class="section-header">
-                <div class="section-title">Section E: Advanced Scenarios</div>
-                <div class="section-progress"><span class="done" data-section-done="E">0</span>/<span data-section-total="E">4</span></div>
-            </div>
-            <div class="scenario" data-id="16">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="16">
-                    <div class="scenario-title"><span class="num">16</span> Storm Surge (Inventory Logic)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Manually trigger activate_storm_mode (via SQL or n8n)</div></div>
-                    <div class="step"><div class="step-label">check</div><div class="step-content">Run: SELECT count(*) FROM operator_appointment_slots WHERE slot_start > NOW()</div></div>
-                    <div class="db-check">
-                        <div class="title">// SUCCESS CRITERIA</div>
-                        <div class="item">→ Count should <span class="val">explode</span> (3 days of extended hours generated)</div>
-                    </div>
-                    <div class="tip">FAIL: Count stays the same → Heartbeat didn't fire</div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="17">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="17">
-                    <div class="scenario-title"><span class="num">17</span> Radar Test (Geospatial Logic)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">prerequisite</div><div class="step-content">Ensure zip_drive_times has data</div></div>
-                    <div class="step"><div class="step-label">setup</div><div class="step-content">In leads table, set a lead's zip to 78704. Ensure an operator has a slot in 78704.</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Trigger the "Emergency" flow (Voice call)</div></div>
-                    <div class="step"><div class="step-label">check</div><div class="step-content">Does the Operator get the text?</div></div>
-                    <div class="db-check">
-                        <div class="title">// SUCCESS CRITERIA</div>
-                        <div class="item">→ Operator receives SMS notification for lead in their sector</div>
-                    </div>
-                    <div class="tip">FAIL: General Escalation gets the text → Radar Miss</div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="18">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="18">
-                    <div class="scenario-title"><span class="num">18</span> Orphan Test (Partition Safety)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">action</div><div class="step-content">Create a call event. Create a transcript.</div></div>
-                    <div class="step"><div class="step-label">verify</div><div class="step-content">Check: transcripts.call_created_at matches call_events.created_at</div></div>
-                    <div class="db-check">
-                        <div class="title">// SUCCESS CRITERIA</div>
-                        <div class="item">→ <span class="tbl">transcripts</span>.<span class="fld">call_created_at</span> = <span class="tbl">call_events</span>.<span class="fld">created_at</span></div>
-                    </div>
-                    <div class="tip">If NULL → Partitioning logic is broken. Data will be lost during future maintenance.</div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-            <div class="scenario" data-id="19">
-                <div class="scenario-header">
-                    <input type="checkbox" class="scenario-checkbox" data-id="19">
-                    <div class="scenario-title"><span class="num">19</span> Take It Simulation (Without GUI)</div>
-                </div>
-                <div class="scenario-content">
-                    <div class="step"><div class="step-label">method</div><div class="step-content">Use Postman or curl (no UI button needed)</div></div>
-                    <div class="step"><div class="step-label">action</div><div class="step-content">POST to your API (or run SQL function) with p_force_operator_id = [Steve's UUID]</div></div>
-                    <div class="step"><div class="step-label">check</div><div class="step-content">Does the appointment appear? Does operator_appointment_slots show booked?</div></div>
-                    <div class="db-check">
-                        <div class="title">// SUCCESS CRITERIA</div>
-                        <div class="item">→ <span class="tbl">appointments</span>: new row with <span class="fld">operator_id</span> = <span class="val">[Steve's UUID]</span></div>
-                        <div class="item">→ <span class="tbl">operator_appointment_slots</span>: <span class="fld">status</span> = <span class="val">'booked'</span></div>
-                    </div>
-                </div>
-                <div class="status-buttons">
-                    <button class="status-btn pass" data-status="pass">pass</button>
-                    <button class="status-btn fail" data-status="fail">fail</button>
-                    <button class="status-btn skip" data-status="skip">skip</button>
-                </div>
-                <div class="notes-toggle">+ notes</div>
-                <div class="notes-area"><textarea placeholder="// observations..."></textarea></div>
-            </div>
-        </section>
-        <section data-section="F">
-            <div class="section-header">
-                <div class="section-title">Section F: Session Metadata</div>
-                <div class="section-progress"></div>
-            </div>
-            <div class="session-notes">
-                <div class="field-group">
-                    <label>tester</label>
-                    <input type="text" id="tester-name" placeholder="adam">
-                </div>
-                <div class="field-group">
-                    <label>environment</label>
-                    <input type="text" id="environment" placeholder="dev | staging | prod — twilio: +1...">
-                </div>
-                <div class="field-group">
-                    <label>blockers</label>
-                    <textarea id="blockers" placeholder="// blocking issues..."></textarea>
-                </div>
-                <div class="field-group">
-                    <label>v2_backlog</label>
-                    <textarea id="v2-backlog" placeholder="// future features..."></textarea>
-                </div>
-            </div>
-        </section>
-        <div class="terminal-footer">
-            <div><span class="cmd">$</span> ./qa_checklist.sh <span class="path">--mode=interactive</span></div>
-            <div>pid: <span id="session-pid">0000</span></div>
-        </div>
-    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar"></div></div>
+
+  <div id="checklist"></div>
+
+  <div class="footer" id="footer">LAST UPDATED: —</div>
 </div>
+
 <script>
-const STORAGE_KEY = 'roofsig-qa-v3';
-document.getElementById('session-pid').textContent = Math.floor(Math.random() * 9000 + 1000);
-let state = { scenarios: {}, sessionNotes: { tester: '', environment: '', blockers: '', v2Backlog: '' }, lastUpdated: null };
+/* ============================================================
+ * DATA
+ * ============================================================ */
+const SECTIONS = [
+  {
+    id: 'sec01',
+    title: 'SEC 01: INBOUND VOICE (WF-01a)',
+    directions: `Pre-requisite: Run lobotomy.sql to reset test phone. Ensure business hours are set to OPEN in BiosScreen > SCHEDULE for the current day. Ensure storm mode is OFF. Have the RoofSig app open on AlertFeed (F2) tab.
+
+1.1-1.3: Call the Twilio tracking number from your test phone. When prompted for SMS consent, press 1. Hang up. Wait for SMS with 3 time slots. Reply with digit "1" to book. After confirmation SMS, reply with a real address (e.g. "316 Congress Ave, Austin TX 78701"). Verify in DB: SELECT stage, consent_sms, pending_slots FROM leads WHERE phone = '+12013203818'. Check AlertFeed shows the alert with parsed ZIP (78701), not Twilio billing ZIP. Check appointments.operator_id IS NULL.
+
+1.4: Run lobotomy.sql. Call again. When prompted for SMS consent, press 2 (decline). Listen for AI voice prompt. Speak a message. Hang up. Check: SELECT * FROM callback_tasks WHERE phone = '+12013203818' ORDER BY created_at DESC LIMIT 1. Verify alert appears in AlertFeed.
+
+1.5: Requires an existing lead in DB (do NOT lobotomize). Call from the same phone. The IVR should recognize you as existing. Press 9 for emergency. Verify: your roofer's escalation phone rings. If no answer after 20s, verify voicemail prompt plays. Check roofer phone for SMS with voicemail link.
+
+1.6: Call again as existing lead. Press 2 for update. Leave a voicemail. Verify: callback_tasks created. Alert appears in AlertFeed. No duplicate lead created: SELECT COUNT(*) FROM leads WHERE phone = '+12013203818' should be 1.
+
+1.7-1.8: Change BiosScreen > SCHEDULE to set current day as CLOSED. Call from test phone. Verify after-hours greeting. Leave voicemail. Check: callback_tasks.bucket = 'after_hours'. Alert in AlertFeed. For 1.8, use existing lead (do not lobotomize first). After testing, restore business hours to OPEN.
+
+1.9: In AlertFeed, find a RADAR-tagged alert. Click the (( RADAR )) badge. CallReviewModal should open. Verify audio playback works.
+
+1.10: After any voicemail test, check the roofer's phone for an SMS containing the Twilio recording URL (.mp3 link).
+
+1.11: Activate storm mode from StormDashboard (F4). Call from test phone. Verify storm IVR plays (not normal IVR). Hang up. Check: SELECT storm_event_id FROM leads WHERE phone = '+12013203818' is not NULL. Deactivate storm mode after test.`,
+    tests: [
+      { id: '1.1',  text: 'New lead incoming call -- SMS consent path',          verify: "Lead created with stage=sms_sent, consent_sms=true. SMS with 3 slots received." },
+      { id: '1.2',  text: 'New lead -- address provided via SMS reply',           verify: "Address parsed correctly. appointments.address updated. ZIP extracted in AlertFeed." },
+      { id: '1.3',  text: 'New lead -- no auto-assignment',                       verify: "After booking, appointments.operator_id IS NULL." },
+      { id: '1.4',  text: 'New lead -- AI voice entry path (SMS declined)',       verify: "Lead hears AI voice prompt. callback_tasks created. Alert in AlertFeed." },
+      { id: '1.5',  text: 'Existing lead -- emergency IVR (digit 9)',             verify: "Call forwarded to roofer escalation phone. Voicemail if no answer." },
+      { id: '1.6',  text: 'Existing lead -- update IVR (digit 2)',                verify: "Voicemail recorded. callback_tasks created. Alert in AlertFeed. No duplicate lead." },
+      { id: '1.7',  text: 'After hours -- new lead',                              verify: "After-hours greeting. Voicemail. callback_tasks.bucket=after_hours. Alert in AlertFeed." },
+      { id: '1.8',  text: 'After hours -- existing lead',                         verify: "Same as 1.7 but lead record updated (not duplicated)." },
+      { id: '1.9',  text: 'Voicemail playback',                                   verify: "Call recording accessible via CallReviewModal (click RADAR badge). Audio plays." },
+      { id: '1.10', text: 'Roofer receives SMS with voicemail link',              verify: "SMS delivered to roofer phone with recording URL." },
+      { id: '1.11', text: 'Storm mode active -- call routes to WF-01',            verify: "Caller hears storm IVR. Lead tagged with storm_event_id." },
+    ]
+  },
+  {
+    id: 'sec02',
+    title: 'SEC 02: SMS REPLY (WF-01b)',
+    directions: `Pre-requisite: Complete test 1.1 so a lead exists with stage=sms_sent and pending_slots populated. Keep your test phone handy for SMS replies.
+
+2.1: Reply "1" to the slots SMS. Verify: SELECT * FROM appointments WHERE lead_id = (SELECT id FROM leads WHERE phone = '+12013203818') ORDER BY created_at DESC LIMIT 1. Appointment exists. operator_appointment_slots row consumed. Confirmation SMS received. Alert appears in AlertFeed.
+
+2.2: Reply with a real address (e.g. "316 Congress Ave, Austin TX 78701"). Verify: appointments.address updated. Check roofer phone for MMS with Google Street View image.
+
+2.3: Run lobotomy.sql, redo 1.1, book a slot. Then reply with gibberish like "xyzzy". Verify error SMS received prompting correct address format.
+
+2.4: Run lobotomy.sql, redo 1.1 (so lead has consent_sms=true). Reply "STOP". Verify: leads.consent_sms = false, leads.stage = 'unresponsive'. Confirmation SMS received.
+
+2.5: Reply "HELP" to the Twilio number. Verify help instructions SMS received.
+
+2.6: After completing 2.1 (lead has appointment), send another digit reply "2". Verify error SMS: "already scheduled". No second appointment in DB.
+
+2.7: Run lobotomy.sql, redo 1.1, book a slot. Then reply with a human message like "Can I come at 4pm instead?". Verify: callback_tasks created. Roofer gets SMS alert.
+
+2.8: After booking (2.1), reply "RESCHEDULE" or similar keyword. Verify: WF-03a fires, new slots SMS received, reschedule_contexts record created.
+
+2.9: Run lobotomy.sql, redo 1.1. Wait >24 hours (or manually expire pending_slots in DB by setting leads.pending_slots = NULL). Reply "1". Verify error SMS: slot no longer available.`,
+    tests: [
+      { id: '2.1', text: 'Booking digit reply (1/2/3)',                 verify: "Appointment created. Slot consumed. Confirmation SMS received. Alert in AlertFeed." },
+      { id: '2.2', text: 'Address reply after booking',                 verify: "appointments.address updated. ZIP extracted. MMS with Street View sent to roofer." },
+      { id: '2.3', text: 'Invalid address format',                      verify: "Error SMS received prompting correct format." },
+      { id: '2.4', text: 'STOP/opt-out reply',                          verify: "leads.consent_sms=false. leads.stage=unresponsive. Confirmation SMS sent." },
+      { id: '2.5', text: 'HELP reply',                                  verify: "Help instructions SMS received." },
+      { id: '2.6', text: 'Already booked (duplicate booking attempt)',  verify: "Error SMS: already scheduled. No duplicate appointment." },
+      { id: '2.7', text: 'Human/unrecognized reply',                    verify: "callback_tasks created. Roofer alerted via SMS." },
+      { id: '2.8', text: 'Reschedule request from SMS',                 verify: "Reschedule flow triggered (WF-03a). Client receives new slot options." },
+      { id: '2.9', text: 'Expired slot reply',                          verify: "Error SMS: slot no longer available." },
+    ]
+  },
+  {
+    id: 'sec03',
+    title: 'SEC 03: MISSED CALL RADAR (WF-02)',
+    directions: `Pre-requisite: Run lobotomy.sql. Ensure WF-02 is active in n8n.
+
+3.1: Call the Twilio tracking number from test phone. Let it ring 3-4 times, then hang up (do NOT answer or let it go to voicemail). Wait ~25 seconds (WF-02 has a 20s wait node). Verify: SELECT * FROM callback_tasks WHERE phone = '+12013203818' ORDER BY created_at DESC LIMIT 1 exists. Radar alert appears in AlertFeed with (( RADAR )) badge. Check roofer phone for missed call SMS.
+
+3.2: Do NOT lobotomize. Ensure the lead from 3.1 exists with consent_sms=true (update manually if needed: UPDATE leads SET consent_sms=true WHERE phone='+12013203818'). Call again, let it ring, hang up. Wait 25s. Verify: radar alert shows lead name and address from DB (not "Unknown"). Auto-reengagement SMS sent to test phone.
+
+3.3: Call the Twilio number. This time, let it connect and answer (have a brief >15s conversation or hold). Hang up. Verify: NO alert created. call_events logged with bucket=answered.
+
+3.4: Call the Twilio number. Hang up within 5 seconds. Verify: call_events.bucket = 'abandoned'. Alert created with bucket=abandoned in metadata.
+
+3.5: After 3.2, check the AlertFeed context block. ZIP should show the ZIP from the lead's address field (parsed by COALESCE/regexp_match), NOT the Twilio billing ZIP (FromZip header).
+
+AUTOMATION: Run WF-91 Chaos_Radar from n8n to generate all 6 call status scenarios programmatically. Then manually verify AlertFeed for correct rendering.`,
+    tests: [
+      { id: '3.1', text: 'Missed call -- new lead',       verify: "CNAM lookup executed. callback_tasks created. Radar alert in AlertFeed. SMS to roofer." },
+      { id: '3.2', text: 'Missed call -- existing lead',  verify: "Radar alert with lead name, address, ZIP from lead record. Auto-reengagement SMS sent." },
+      { id: '3.3', text: 'Answered call (duration >15s)', verify: "No alert created. Call logged only." },
+      { id: '3.4', text: 'Abandoned call (<15s)',         verify: "Classified as abandoned bucket. Alert created." },
+      { id: '3.5', text: 'ZIP code correctness',          verify: "Alert shows ZIP from leads.address (parsed), not billing ZIP from Twilio." },
+    ]
+  },
+  {
+    id: 'sec04',
+    title: 'SEC 04: RESCHEDULE (WF-03a / WF-03b)',
+    directions: `Pre-requisite: Complete a full booking (Section 1.1 + 2.1) so an active appointment exists. Keep your test phone.
+
+4.1: Trigger reschedule by replying "RESCHEDULE" to the Twilio number (if supported in WF-01b), or manually POST to /reschedule-initiate with { "appointment_id": "<UUID>" }. Verify: SMS received with 3 new time slots. SELECT * FROM reschedule_contexts WHERE phone = '+12013203818' shows a record with expires_at ~1 hour from now.
+
+4.2: Reply "1" to the reschedule SMS. Verify: appointments.start_at and end_at changed. Old slot freed (operator_appointment_slots.status = 'available'). Confirmation SMS received. reschedule_contexts record deleted.
+
+4.3: Trigger another reschedule (redo 4.1). Reply "7" (invalid). Verify error SMS prompting 1/2/3.
+
+4.4: Trigger reschedule. Manually expire the context: UPDATE reschedule_contexts SET expires_at = NOW() - interval '1 hour' WHERE phone = '+12013203818'. Reply "1". Verify error SMS: context expired.
+
+4.5: Trigger reschedule (4.1) but do NOT reply. Open AlertFeed. Find the alert for this lead. Verify RESCHED badge is visible. Click it. RescheduleModal opens showing the 3 pending slots.
+
+AUTOMATION: Run WF-93 Reschedule_Flow_Test from n8n. It seeds an appointment, triggers initiation, simulates reply "1", and verifies the appointment was updated.`,
+    tests: [
+      { id: '4.1', text: 'Reschedule initiation',              verify: "Client receives SMS with 3 new time slots. reschedule_contexts record created." },
+      { id: '4.2', text: 'Client replies with valid digit',    verify: "Appointment start_at/end_at updated. Old slot freed. Confirmation SMS sent. reschedule_contexts deleted." },
+      { id: '4.3', text: 'Client replies with invalid digit',  verify: "Error SMS prompting 1/2/3." },
+      { id: '4.4', text: 'Context expired (>1 hour)',          verify: "Error SMS: expired. Must call back." },
+      { id: '4.5', text: 'Reschedule badge in AlertFeed',      verify: "Alert with active reschedule_contexts shows RESCHED badge. Click opens RescheduleModal." },
+    ]
+  },
+  {
+    id: 'sec05',
+    title: 'SEC 05: ESCALATION POLICY (WF-07)',
+    directions: `Pre-requisite: Ensure an escalation policy exists in BiosScreen > TUNING. Note the delay_minutes for step 1 (e.g. 5 minutes). Ensure WF-07 is ACTIVE in n8n (it runs every minute via schedule trigger).
+
+5.1: Create an overdue callback: generate a missed call (Section 3.1) to create a callback_tasks record. Wait for the escalation policy's delay_minutes to pass. Verify: SELECT * FROM escalations WHERE callback_task_id = '<task_id>' has a record. Alert appears in AlertFeed with [ESC-L*] badge.
+
+5.2-5.4: These depend on what action types your escalation policy steps are configured for (sms_escalation, call_escalation, email_escalation). For SMS: check roofer's escalation phone. For call: the escalation phone should ring with a TwiML voice message. For email: check the roofer's email inbox.
+
+5.5: Delete all escalation policies from BiosScreen > TUNING. Create a new overdue callback. Wait for WF-07 to fire. Verify: alert created with title containing "escalation policy missing" or similar. Restore policies after test.
+
+5.6: Configure a policy with only 1 step (e.g. SMS at 5 minutes). Create overdue callback. Wait for step to fire. Wait another cycle. Verify: no second escalation record created. DB: SELECT COUNT(*) FROM escalations WHERE callback_task_id = '<task_id>' equals 1.
+
+5.7: After an escalation alert appears in AlertFeed (from 5.1), click [CLAIM]. Verify: callback_tasks.state changes to a claimed/active state. Alert disappears from feed or shows as acknowledged.
+
+AUTOMATION: WF-94 Chaos_Escalation automates 5.1 end-to-end.`,
+    tests: [
+      { id: '5.1', text: 'Overdue callback triggers escalation',  verify: "After policy delay_minutes, escalation record created. Alert in AlertFeed with ESC badge." },
+      { id: '5.2', text: 'SMS escalation action',                 verify: "SMS sent to roofer escalation phone with overdue details." },
+      { id: '5.3', text: 'Call escalation action',                verify: "Twilio call made to escalation phone with TwiML voice message." },
+      { id: '5.4', text: 'Email escalation action',               verify: "Email sent to roofer email with overdue details." },
+      { id: '5.5', text: 'No escalation policy configured',       verify: "Escalation policy missing alert created." },
+      { id: '5.6', text: 'All steps exhausted',                   verify: "No further escalations after last step. Alert indicates exhaustion." },
+      { id: '5.7', text: 'Claim escalation from AlertFeed',       verify: "Operator clicks CLAIM. callback_tasks.state updated. Escalation resolved." },
+    ]
+  },
+  {
+    id: 'sec06',
+    title: 'SEC 06: STORM MODE (WF-01 Storm)',
+    directions: `Pre-requisite: Run lobotomy.sql. Ensure WF-01 Storm_Mode is active in n8n. Ensure at least one operator has an appointment in a service area ZIP today (for sector routing test 6.4).
+
+6.1: Open StormDashboard (F4). Click the storm mode toggle to ACTIVATE. Verify: SELECT * FROM storm_events WHERE status = 'active' returns a row. Elapsed timer starts counting in the UI.
+
+6.2: With storm mode active, call the Twilio number from test phone. Verify: storm IVR plays ("Press 1 for emergency, 2 for standard"). Press 1 and leave a message. Hang up.
+
+6.3: After 6.2, verify: SELECT * FROM leads WHERE phone = '+12013203818' ORDER BY created_at DESC LIMIT 1. Check tags field contains AI-extracted fields (summary, urgency, zip_code, key_details). Check storm_event_id is set.
+
+6.4: Check if an operator is assigned to the same ZIP as the lead. If yes: that operator's phone should receive a sector-specific SMS alert. If no: the roofer's escalation phone should receive a general storm alert SMS.
+
+6.5: In StormDashboard, verify the metrics panel shows: Efficiency, Burnout Risk, Surge Capacity, Revenue Per Hour. Values should be non-zero if there's been activity.
+
+6.6: In StormDashboard, find the notes section. Add a note (e.g. "Test note"). Verify: SELECT * FROM storm_events WHERE status = 'active' -- check notes field contains the text.
+
+6.7: Click the storm mode toggle to DEACTIVATE. Verify: storm_events.status = 'ended'. Check roofer phone for summary SMS with call/lead/appointment counts.
+
+6.8: Open BiosScreen > TUNING. Change storm sensitivity threshold. Save. Verify the value persists after navigating away and back.
+
+AUTOMATION: Run WF-92 Storm_Lifecycle_Test from n8n.`,
+    tests: [
+      { id: '6.1', text: 'Activate storm mode from StormDashboard',                    verify: "storm_events record created. Storm mode active. Elapsed timer starts." },
+      { id: '6.2', text: 'Inbound call during storm mode',                             verify: "Caller hears storm IVR. Emergency (digit 1) or standard (digit 2) recording." },
+      { id: '6.3', text: 'LLM analysis of storm recording',                            verify: "Lead created with AI-extracted summary, urgency, ZIP, key_details." },
+      { id: '6.4', text: 'Sector-based routing during storm',                          verify: "If operator in same ZIP today, SMS sent to that operator. Otherwise general escalation SMS." },
+      { id: '6.5', text: 'Storm metrics (efficiency, burnout, surge capacity, rev/hr)', verify: "StormDashboard shows real-time metrics. Values update." },
+      { id: '6.6', text: 'Storm note logging',                                         verify: "Append note via StormDashboard. Note persisted in DB." },
+      { id: '6.7', text: 'Deactivate storm mode',                                      verify: "Storm event ended. Summary SMS sent to roofer." },
+      { id: '6.8', text: 'Storm tuning (BiosScreen)',                                  verify: "Adjust storm sensitivity threshold in TUNING tab. Value persisted." },
+    ]
+  },
+  {
+    id: 'sec07',
+    title: 'SEC 07: EMERGENCY FLOW',
+    directions: `Pre-requisite: Ensure the roofer has escalation_phone set in the roofers table (verify in BiosScreen > IDENTITY). Run lobotomy.sql for new-lead test. Keep an existing lead for 7.2.
+
+7.1: Call the Twilio number as a new lead. Navigate through the IVR to the emergency option (press 9 during the new lead menu, or navigate to "Press 9 for emergency" when it's offered). Verify: your roofer's escalation phone rings. If you don't answer within 20 seconds, verify voicemail prompt plays. Hang up. Check AlertFeed for emergency alert.
+
+7.2: Do NOT lobotomize. Call again (existing lead path). Press 1 for emergency in the existing client menu. Same verification as 7.1. Additionally verify: SELECT COUNT(*) FROM leads WHERE phone = '+12013203818' is still 1 (no duplicate).
+
+7.3: After either 7.1 or 7.2, check the roofer's phone for an SMS containing emergency details (caller phone, recording URL, lead info).
+
+7.4: Check the roofer's email for an emergency notification email. (This depends on whether the email action is configured in the emergency path nodes of WF-01a.)`,
+    tests: [
+      { id: '7.1', text: 'Emergency IVR -- new lead (digit 9)',   verify: "Call forwarded to escalation phone. If no answer, voicemail. Emergency alert in AlertFeed." },
+      { id: '7.2', text: 'Emergency IVR -- existing lead',        verify: "Same routing. Lead record updated (not duplicated)." },
+      { id: '7.3', text: 'Emergency SMS notification',            verify: "Roofer receives SMS with emergency details." },
+      { id: '7.4', text: 'Emergency email notification',          verify: "Roofer receives email with emergency details." },
+    ]
+  },
+  {
+    id: 'sec08',
+    title: 'SEC 08: ALERTFEED UI',
+    directions: `Pre-requisite: Generate test data by running through Section 1 and Section 3 so you have a mix of INBOUND and RADAR alerts. Optionally run WF-91 Chaos_Radar to populate varied alert types. Keep the RoofSig app open.
+
+8.1: Click each filter button: ALL, TASKS, RADAR, INBOUND. Verify each shows only the correct subset. TASKS shows escalation alerts. RADAR shows missed call alerts. INBOUND shows new lead alerts. ALL shows everything.
+
+8.2: While watching AlertFeed, trigger a new missed call (Section 3.1) from another device or tab. Verify the alert appears in real-time with the phosphor-snap animation (green flash). No page refresh needed.
+
+8.3: Have an alert in the feed. Go through the full booking flow (ACQUIRE -> Dossier -> Book -> Revenue). After booking completes, verify the alert disappears from the feed.
+
+8.4: Click [ACQUIRE] on a radar or inbound alert. LeadIntelModal opens. Confirm acquisition. Verify: button changes from [ACQUIRE] to [>> ENGAGED]. Lead ownership assigned in DB.
+
+8.5: Click [>> ENGAGED] to open the DossierModal. Select an operator from the dropdown. Click "Fetch Slots". Select a time slot. Click "Book". Verify appointment created. Then commit revenue in the revenue field. Verify button changes to show revenue amount.
+
+8.6: On an unbooked alert, hold the [DROP] jammer switch (press and hold). After the dead-man's hold duration, DropReasonSelector appears. Select a reason (spam, wrong number, etc.). Confirm. Alert removed from feed. Verify: alerts.status = 'closed' in DB.
+
+8.7: On an alert, click [CMD]. TacticalMenu opens. Verify options: call review, reschedule (if applicable). Click call review to verify CallReviewModal opens.
+
+8.8: Trigger a NOAA weather alert (requires active weather, or manually insert into noaa_alerts). Verify the alert shows with red border and strobe animation (klaxon style).
+
+8.9: Trigger an escalation (Section 5.1). Verify the ESC alert shows with red border and priority badge like [ESC-LH] or [ESC-LM].
+
+8.10: With the app connected, verify footer shows green dot + "LIVE". Disable network (airplane mode or kill Supabase). Verify it changes to DISCONNECTED. Restore network.
+
+8.11: Look at any alert's context block. Verify it shows a structured key-value grid (TYPE, BUCKET, CARRIER, NAME, PHONE, SMS, SOURCE, ZIP, ADDRESS) -- NOT raw JSON with database UUIDs like call_sid, callback_task_id, lead_id.`,
+    tests: [
+      { id: '8.1',  text: 'Filter toggles (ALL / TASKS / RADAR / INBOUND)',  verify: "Each filter shows correct subset. Counts accurate." },
+      { id: '8.2',  text: 'Real-time alert appearance',                       verify: "New alert appears without page refresh. Phosphor-snap animation plays." },
+      { id: '8.3',  text: 'Alert disappears after booking',                   verify: "Once appointment booked, alert removed from feed." },
+      { id: '8.4',  text: 'ACQUIRE flow',                                     verify: "Click ACQUIRE. LeadIntelModal opens. Confirm. Lead ownership assigned. Button changes to ENGAGED." },
+      { id: '8.5',  text: 'Booking flow (DossierModal)',                      verify: "Open dossier. Select operator. Fetch slots. Book appointment. Revenue commit." },
+      { id: '8.6',  text: 'JAM/DROP flow',                                    verify: "Hold jammer switch. Drop reason selector appears. Confirm reason. Alert removed." },
+      { id: '8.7',  text: 'CMD tactical menu',                                verify: "Click CMD. TacticalMenu opens. Callreview, reschedule options available." },
+      { id: '8.8',  text: 'Klaxon alert styling',                             verify: "Critical/NOAA alerts show red border, strobe animation." },
+      { id: '8.9',  text: 'Escalation alert styling',                         verify: "ESC alerts show red border, priority badge [ESC-LH/LM/LE]." },
+      { id: '8.10', text: 'Connection status indicator',                      verify: "Shows LIVE when connected. DISCONNECTED on WebSocket failure." },
+      { id: '8.11', text: 'Metadata context block formatting',                verify: "Shows structured key-value grid (not raw JSON). No database UUIDs visible." },
+    ]
+  },
+  {
+    id: 'sec09',
+    title: 'SEC 09: OPERATOR BOARD (F3)',
+    directions: `Pre-requisite: At least one appointment must be booked (Section 2.1). At least one operator must exist. Have the app open on F3 (Operator Board).
+
+9.1: Verify the schedule grid displays operators on the Y axis and time slots on the X axis. Business hours should match BiosScreen > SCHEDULE settings. Non-business hours should not show slots.
+
+9.2: Find the appointment booked in Section 2.1. Verify it appears as a colored blip at the correct time slot on the correct operator's row (or "Unassigned" if operator_id is NULL).
+
+9.3: Click the appointment blip. AppointmentDossier modal opens. Verify it shows: lead name, phone, address, appointment time, status, operator, and action controls (abort, mark complete, etc.).
+
+9.4: While viewing F3, book a new appointment from AlertFeed (on a different tab/screen). Switch back to F3. Verify the new blip appears without a page refresh (real-time via Supabase).
+
+9.5: During a booking flow (Section 8.5), select a specific operator. After booking, switch to F3. Verify the appointment blip is on that operator's row.
+
+9.6: Find the Grid/Manifest toggle. Switch between views. Verify both show the same appointment data in different layouts. Grid shows a timeline. Manifest shows a list.
+
+9.7: In the operator metrics sidebar (right panel), verify each operator row shows: utilization bar, no-show rate, drive efficiency (avg minutes). Click an operator to select/highlight.`,
+    tests: [
+      { id: '9.1', text: 'Schedule grid rendering',             verify: "Operators on Y axis, time slots on X. Correct business hours displayed." },
+      { id: '9.2', text: 'Appointment blip display',            verify: "Booked appointment shows as colored blip at correct time." },
+      { id: '9.3', text: 'Click blip opens AppointmentDossier', verify: "Modal shows appointment details, lead info, status controls." },
+      { id: '9.4', text: 'Real-time appointment updates',       verify: "New booking appears on grid without page refresh." },
+      { id: '9.5', text: 'Operator assignment from booking',    verify: "Operator selected during booking appears on grid." },
+      { id: '9.6', text: 'Grid/Manifest view toggle',           verify: "Both views render correctly and show same data." },
+      { id: '9.7', text: 'Operator metrics sidebar',            verify: "Utilization, no-show rate, drive efficiency displayed per operator." },
+    ]
+  },
+  {
+    id: 'sec10',
+    title: 'SEC 10: SYSTEM PANEL (F5)',
+    directions: `Pre-requisite: Have the app running and connected. Navigate to F5 (System Panel). Data populates automatically from backend polling.
+
+10.1: Verify the SLO Error Budget section displays a burn rate value. If SLOs are configured (slos table), the percentage should reflect actual breach status. If no SLOs exist, it should show a zero/empty state gracefully.
+
+10.2: The Database Latency readout should show a value in milliseconds. The app is hosted in Israel connecting to a US Supabase instance, so expect high latency (~200-500ms). Verify the display does NOT show a false alert. If latency exceeds the configured threshold, a high-latency warning should appear.
+
+10.3: The Webhook Latency section should render a sparkline chart with historical data points. If webhook_logs table has data, the sparkline should show variation over time.
+
+10.4: Provider Status section shows: COMM LINK (Twilio), MEMORY CORE (Database), CORTEX LINK (n8n), CHRONO SYNC (Google Calendar). Each should show ONLINE (green), SILENT (amber), or DOWN (red) based on recent activity.
+
+10.5: System Log section should show recent events (audit_events + webhook 5xx errors). Scroll through entries. Verify they include timestamps, event types, and brief descriptions.
+
+10.6: Find a "SESSION: login" entry in the system log (trigger one by logging out and back in). Click it. Verify: EventDetailModal opens showing operator name, login time, and session details.`,
+    tests: [
+      { id: '10.1', text: 'SLO error budget display',       verify: "Burn rate calculated and displayed." },
+      { id: '10.2', text: 'Database latency monitoring',    verify: "Latency value shown. High latency alert triggers at threshold." },
+      { id: '10.3', text: 'Webhook latency sparkline',      verify: "Sparkline renders with historical data points." },
+      { id: '10.4', text: 'Provider status indicators',     verify: "Twilio, DB, n8n, GCal show ONLINE/SILENT/DOWN status." },
+      { id: '10.5', text: 'System log entries',             verify: "Audit events and webhook errors displayed in log." },
+      { id: '10.6', text: 'Clickable session/login events', verify: "Click SESSION log entry opens EventDetailModal with operator info and timestamp." },
+    ]
+  },
+  {
+    id: 'sec11',
+    title: 'SEC 11: BIOS CONFIGURATION (F6)',
+    directions: `Pre-requisite: Log in as an admin/owner role operator. Navigate to F6 (BiosScreen). NOTE: Record original values before changing anything so you can restore after testing.
+
+11.1: SECTORS tab. Click "Add ZIP" (or equivalent). Enter a valid US ZIP (e.g. "90210"). Save. Verify: SELECT * FROM service_areas WHERE zip_code = '90210' exists. Navigate to F1 (SectorPlot). Verify the new ZIP appears as a grid point on the map. Then remove the ZIP and verify it disappears.
+
+11.2: SECTORS tab. Click the "Auto-Calculate Routes" button (triggers WF-08). Verify: in n8n, WF-08 execution appears. After completion: SELECT * FROM zip_drive_times WHERE roofer_id = '<your_roofer_id>' LIMIT 5 has data.
+
+11.3: CREW tab. Click "Create Operator". Fill in name, phone, role (field). Save. Verify: SELECT * FROM operators WHERE name = '<test_name>' exists. Provisioning key should appear.
+
+11.4: CREW tab. On the new operator, click "Generate Key" or "Resend Key". Verify key is displayed in the UI. If email/SMS delivery is configured, check inbox/phone.
+
+11.5: CREW tab. On an operator, click "Link Google Calendar". Complete the OAuth flow in the browser popup. Verify: GCal sync status shows "LINKED" with a timestamp.
+
+11.6: CREW tab. Find the "Max Concurrent Appointments" field. Change the value (e.g. from 2 to 1). Save. Verify: SELECT max_concurrent_appointments FROM roofers WHERE id = '<roofer_id>'. Value matches.
+
+11.7-11.8: TUNING tab. Change storm sensitivity and no-show tolerance values. Save. Navigate away and back. Verify values persisted.
+
+11.9: TUNING tab. Create a new escalation policy: set name, enable it, add a step (delay: 5 min, action: SMS, priority: normal). Save. Verify: SELECT * FROM escalation_policies WHERE roofer_id = '<roofer_id>' shows the policy with updated_at timestamp. Edit the policy (change delay to 10 min). Save. Verify updated_at changed. Delete the policy.
+
+11.10-11.11: IDENTITY tab. Change company name. Save. Verify in DB and UI header. Change escalation phone. Save. Verify: SELECT escalation_phone FROM roofers WHERE id = '<roofer_id>'. Restore originals.
+
+11.12: SCHEDULE tab. Toggle a day to CLOSED. Set times. Save. Verify: SELECT business_hours FROM roofers WHERE id = '<roofer_id>'. The JSON reflects changes. Restore original schedule.
+
+11.13: Log out. Log in as a field-role operator (if one exists). Navigate to F6. Verify: access denied / no BiosScreen displayed. RBAC enforced.`,
+    tests: [
+      { id: '11.1',  text: 'SECTORS: Add/remove ZIP code',           verify: "ZIP added/removed in service_areas table. SectorPlot updates." },
+      { id: '11.2',  text: 'SECTORS: Trigger auto-calculate routes', verify: "WF-08 fires. Drive times populated." },
+      { id: '11.3',  text: 'CREW: Create new operator',              verify: "operators record created. Provisioning key generated." },
+      { id: '11.4',  text: 'CREW: Generate/resend provisioning key', verify: "Key generated. Email/SMS sent." },
+      { id: '11.5',  text: 'CREW: Link Google Calendar',             verify: "OAuth flow completes. gcal_token stored. Sync status shows LINKED." },
+      { id: '11.6',  text: 'CREW: Set max concurrent appointments',  verify: "Value persisted in roofers table. Enforced in booking flow." },
+      { id: '11.7',  text: 'TUNING: Storm sensitivity',              verify: "Value persisted. Affects storm mode activation threshold." },
+      { id: '11.8',  text: 'TUNING: No-show tolerance',              verify: "Value persisted. Affects no-show rate alerting in OperatorMetrics." },
+      { id: '11.9',  text: 'TUNING: Escalation policy CRUD',         verify: "Create, edit, delete policies. Steps configured. updated_at timestamp shown." },
+      { id: '11.10', text: 'IDENTITY: Company name',                 verify: "Updated in roofers table. Reflected in UI header." },
+      { id: '11.11', text: 'IDENTITY: Escalation phone',             verify: "Updated in roofers table. Used by WF-07 escalation." },
+      { id: '11.12', text: 'SCHEDULE: Business hours',               verify: "Open/closed days and times persisted. Affects after-hours routing in WF-01a." },
+      { id: '11.13', text: 'RBAC: Non-admin cannot access BIOS',     verify: "Field/sales operators blocked from BiosScreen." },
+    ]
+  },
+  {
+    id: 'sec12',
+    title: 'SEC 12: CAPACITY ENFORCEMENT',
+    directions: `Pre-requisite: In BiosScreen > CREW, set max_concurrent_appointments to a known value (e.g. 2). Ensure at least 1 operator exists. Run lobotomy.sql and clear any existing appointments for the test slots.
+
+12.1: Book appointments up to the max_concurrent_appointments limit for the same time slot. Use the booking flow (Section 1.1 + 2.1) or manual booking from DossierModal. After reaching the limit, attempt one more booking for the same time slot. Verify: the slot is no longer available in the "Fetch Slots" response. Error message or empty slot list returned.
+
+12.2: After booking in 12.1, switch to F3 (Operator Board). Verify the booked slots show as consumed (colored blips). The slot should NOT appear as available for additional bookings.
+
+12.3: In F3, click a booked appointment blip. In AppointmentDossier, click "Abort" (or equivalent cancel action). Verify: the slot is released (operator_appointment_slots.status = 'available'). The blip disappears from F3. A new booking for that slot should now succeed.
+
+AUTOMATION: WF-95 Chaos_Capacity automates this: books N slots, attempts N+1, asserts the last one fails.`,
+    tests: [
+      { id: '12.1', text: 'max_concurrent_appointments enforced',  verify: "Book up to limit. Next booking attempt returns no available slots for that time." },
+      { id: '12.2', text: 'Slot consumption',                      verify: "Booked slot shows as unavailable in OperatorBoard." },
+      { id: '12.3', text: 'Slot release on abort',                 verify: "Aborting appointment frees the slot. Slot shows available again." },
+    ]
+  },
+  {
+    id: 'sec13',
+    title: 'SEC 13: OPERATOR FLOWS',
+    directions: `Pre-requisite: At least two operator accounts exist (one admin, one field). For ping testing (13.4-13.5), you need two devices running simultaneously.
+
+13.1: Open the app. Log in with valid admin credentials. Verify: session established, operator name shown in the status bar header, F2 (AlertFeed) loads with LIVE status.
+
+13.2: Create a new operator in BiosScreen > CREW (Section 11.3). Copy the provisioning key. Open the app on a second device (or incognito). Select "Initialize" mode on login screen. Enter the provisioning key + email + password. Verify: profile created, operator logged in, session active.
+
+13.3: In F3 (Operator Board), find the metrics sidebar. Click the shift toggle on an operator. Verify: dot color changes (green = on shift, gray = off shift). DB: SELECT is_on_shift FROM operators WHERE id = '<operator_id>' reflects the change.
+
+13.4: Requires two simultaneous sessions. On Desktop (Operator A): open F3, find Operator B's row, click the PING button. On Mobile/second device (Operator B): verify a notification appears (Tauri notification plugin).
+
+13.5: On Operator B's device, acknowledge the ping (click the notification or the ping indicator in-app). On Operator A's device, verify the ping status changes to ACK.
+
+13.6: Trigger an escalation alert (Section 5.1). In AlertFeed, click [CLAIM] on the ESC alert. Verify: callback_tasks.state updates. Alert status changes. The task is now assigned to the claiming operator.
+
+13.7: After claiming (13.6), find the callback task. Mark it as resolved (via CallbackDossier or tactical menu). Verify: alert removed from feed. DB: callback_tasks.status = 'resolved'.`,
+    tests: [
+      { id: '13.1', text: 'Operator login',                         verify: "Successful auth. Session established. Operator name in status bar." },
+      { id: '13.2', text: 'Operator initialization (provisioning)', verify: "New operator claims slot with valid key. Profile created." },
+      { id: '13.3', text: 'Shift toggle (on/off)',                  verify: "Shift status updated in DB. OperatorMetrics shows current state." },
+      { id: '13.4', text: 'Ping/notification (desktop to mobile)',  verify: "Operator A sends ping from desktop. Operator B receives notification on mobile." },
+      { id: '13.5', text: 'Ping acknowledgement',                   verify: "Operator B acknowledges ping. Operator A sees ACK status." },
+      { id: '13.6', text: 'Callback claim from AlertFeed',          verify: "Click CLAIM on escalation alert. Task assigned to operator." },
+      { id: '13.7', text: 'Callback resolve',                       verify: "Mark callback as resolved. Alert removed." },
+    ]
+  },
+  {
+    id: 'sec14',
+    title: 'SEC 14: MAP / SECTOR (F1)',
+    directions: `Pre-requisite: Mapbox token must be set (check .env.local for NEXT_PUBLIC_MAPBOX_TOKEN or the Tauri env). At least one service area ZIP must exist. At least one appointment should be booked for today.
+
+14.1: Navigate to F1 (RadarPanel / SectorPlot). Verify: map loads (not a blank/error state). Service area ZIP codes appear as grid markers on the map. If no Mapbox token, verify the placeholder state renders gracefully.
+
+14.2: With a booked appointment for today, verify: a blip marker appears on the map at the approximate location of the appointment's ZIP code. Active appointments show one color, pending show another.
+
+14.3: Hover over a blip marker. Verify tooltip shows: ZIP code, lead name, operator name, scheduled time, job value (revenue), zone status (active/pending).
+
+14.4: If WF-99 System_Janitor ran and auto-expired a past-due appointment, verify it no longer appears as an active blip on the map. Only today's active/pending appointments show.`,
+    tests: [
+      { id: '14.1', text: 'SectorPlot loads with Mapbox',   verify: "Map renders. Service area grid points displayed." },
+      { id: '14.2', text: 'Appointment blips on map',       verify: "Active/pending appointments show as blips at correct locations." },
+      { id: '14.3', text: 'Blip tooltips',                  verify: "Hover shows ZIP, lead name, operator, scheduled time, revenue." },
+      { id: '14.4', text: 'Stale appointments cleared',     verify: "Past-due appointments removed from map (WF-99 auto-expire)." },
+    ]
+  },
+  {
+    id: 'sec15',
+    title: 'SEC 15: NOAA WEATHER (WF-NOAA)',
+    directions: `Pre-requisite: WF-NOAA must be active in n8n. Service area ZIPs must be configured with valid coordinates (run WF-08 first if needed). NOAA weather alerts depend on actual NWS data -- if no active weather alerts exist for your area, you can manually insert a test record.
+
+15.1: Verify: SELECT * FROM noaa_alerts WHERE roofer_id = '<roofer_id>' ORDER BY created_at DESC LIMIT 5. If WF-NOAA is running every 15 minutes and there are active weather events, records should exist. If your service areas have no active weather, insert a test:
+  INSERT INTO noaa_alerts (roofer_id, event_type, severity, headline, description, zones, expires_at) VALUES ('<roofer_id>', 'Severe Thunderstorm Warning', 'severe', 'TEST ALERT', 'Test description', '["NJZ104"]', NOW() + interval '2 hours').
+
+15.2: Navigate to F4 (StormDashboard). Verify NOAA alerts appear in the alerts feed. Click an alert. NoaaDetailModal opens with full details (event type, headline, description, affected zones, expiry).
+
+15.3: When WF-NOAA detects a new severe alert (on INSERT, not UPDATE), verify: the roofer's escalation phone receives an SMS with the weather alert details.`,
+    tests: [
+      { id: '15.1', text: 'NOAA alerts fetched',    verify: "Active weather alerts for service area ZIPs stored in noaa_alerts." },
+      { id: '15.2', text: 'NOAA alert displayed',   verify: "StormDashboard shows active NOAA alerts. NoaaDetailModal opens on click." },
+      { id: '15.3', text: 'NOAA alert SMS',         verify: "New severe alert triggers SMS to roofer escalation phone." },
+    ]
+  },
+  {
+    id: 'sec16',
+    title: 'SEC 16: REVIEW ENGINE (WF-09) -- Feature Stub',
+    directions: `Pre-requisite: WF-09 and WF-10 must be activated in n8n. A review_url must be set in the roofer's settings (Google Business Profile review URL). A completed appointment must exist with a valid lead_id that has a phone number.
+
+16.1: Manually POST to the n8n webhook: POST https://hooks.roofsig.com/webhook/job-done with body { "appointment_id": "<UUID_of_completed_appointment>" }. Verify: SELECT * FROM review_requests WHERE appointment_id = '<UUID>' exists with status = 'sent'. Client phone receives SMS with review link.
+
+16.2: Open the review link URL from the SMS in a browser. Verify: HTTP 302 redirect to Google Business Profile review page. DB: review_requests.status = 'clicked'.
+
+16.3: This requires waiting 24 hours (WF-09 has a Wait node). For testing, manually set the Wait node to a shorter duration (e.g. 2 minutes) in n8n, or manually trigger the nudge branch. Verify: if status is still 'sent' after the wait, nudge SMS is sent. nudge_sent_at timestamp updated.
+
+NOTE: WF-09 is a v1 deliverable. The /job-done trigger needs to be hooked up to the appointment completion flow in the UI. This is a backlog item.`,
+    tests: [
+      { id: '16.1', text: 'Job done webhook triggers review SMS',  verify: "POST to /job-done with appointment_id. Client receives review link SMS." },
+      { id: '16.2', text: 'Review link redirect',                  verify: "Clicking link redirects to Google Business Profile review URL (WF-10)." },
+      { id: '16.3', text: '24hr nudge SMS',                        verify: "If not clicked after 24hrs, nudge SMS sent." },
+    ]
+  },
+  {
+    id: 'sec17',
+    title: 'SEC 17: SYSTEM JANITOR (WF-99)',
+    directions: `Pre-requisite: WF-99 must be active in n8n (runs daily at 3 AM). For manual testing, trigger the workflow execution manually from the n8n UI.
+
+17.1: Create an expired reschedule context: INSERT INTO reschedule_contexts (phone, appointment_id, expires_at, slots) VALUES ('+10000000000', '<any_appointment_id>', NOW() - interval '2 hours', '[]'). Manually trigger WF-99. Verify: the record is deleted.
+
+17.2: Create a past-due appointment: UPDATE appointments SET end_at = NOW() - interval '7 hours', status = 'scheduled' WHERE id = '<test_id>'. Trigger WF-99. Verify: appointments.status = 'no_show' for that record (>6 hour grace period).
+
+17.3: Insert a stale webhook log: INSERT INTO webhook_logs (roofer_id, source, payload, created_at) VALUES ('<roofer_id>', 'test', '{}', NOW() - interval '31 days'). Trigger WF-99. Verify: record deleted.`,
+    tests: [
+      { id: '17.1', text: 'Expired reschedule_contexts cleaned', verify: "Contexts older than 1hr deleted." },
+      { id: '17.2', text: 'Past-due appointments auto-expired',  verify: "Appointments >6hrs past end_at set to status=no_show." },
+      { id: '17.3', text: 'Stale webhook_logs purged',           verify: "Logs >30 days deleted." },
+    ]
+  },
+  {
+    id: 'sec18',
+    title: 'SEC 18: CROSS-CUTTING',
+    directions: `18.1: From the project root, run: nix develop --command bash -c 'cd frontend && npm run tauri:dev'. Verify: desktop app opens without compilation errors. AlertFeed loads. LIVE status shown.
+
+18.2: Run the Android dev build (refer to flake.nix for Android SDK/NDK setup). Verify: app installs and launches on emulator/device without crash.
+
+18.3: With the app running, verify the footer shows "LIVE" with a green dot. Open Supabase dashboard and check the Realtime section -- the app should appear as a connected client. Trigger a DB change (e.g. insert an alert). Verify the change propagates to the frontend.
+
+18.4: Simulate Supabase outage: disconnect network (airplane mode) or block Supabase URL. Verify: the app transitions to Lifeboat mode. LifeboatBanner appears. Perform an action (e.g. acknowledge an alert). Verify the write is queued locally (check via dev tools or get_pending_writes_count command).
+
+18.5: Restore network. Verify: Lifeboat mode deactivates. Queued writes replay to Supabase. State synchronized. Previously queued alert acknowledgment now reflected in DB.
+
+18.6: Scroll through a full AlertFeed. Verify: no visible scrollbars on the feed panel. Content scrolls via touch/mousewheel. The no-scrollbar CSS class hides the bar.`,
+    tests: [
+      { id: '18.1', text: 'Desktop build compiles',              verify: "nix develop --command ... tauri:dev starts without errors." },
+      { id: '18.2', text: 'Android build compiles',              verify: "Android dev build starts without errors." },
+      { id: '18.3', text: 'Real-time WebSocket connection',      verify: "Supabase realtime connects. Events flow to frontend." },
+      { id: '18.4', text: 'Lifeboat mode activation',            verify: "Kill Supabase connection. App enters lifeboat mode. Pending writes queued." },
+      { id: '18.5', text: 'Lifeboat mode recovery',              verify: "Restore connection. Queued writes replayed. State synchronized." },
+      { id: '18.6', text: 'No visible scrollbars in AlertFeed',  verify: "AlertFeed panel scrolls content but shows no scrollbar." },
+    ]
+  },
+  {
+    id: 'sec19',
+    title: 'SEC 19: REVENUE PANEL (F4)',
+    directions: `Pre-requisite: Have at least a few booked appointments with committed revenue (Section 8.5). Navigate to F4 > Revenue tab.
+
+19.1: Verify the Pipeline Value readout shows the total estimated value of today's appointments. Cross-check against: SELECT SUM(COALESCE(revenue_actual, estimated_value)) FROM appointments WHERE DATE(start_at) = CURRENT_DATE AND roofer_id = '<roofer_id>'.
+
+19.2: The Funnel visualization should show counts at each stage: leads -> qualified -> booked -> won. Values should reflect actual DB state.
+
+19.3: Hot Zones should list the top ZIPs by lead count / appointment count / revenue. Click a ZIP code. Verify SectorDossier modal opens.
+
+19.4: Efficiency Matrix should list operators sorted by efficiency. Click an operator name. Verify OperatorDossier modal opens.`,
+    tests: [
+      { id: '19.1', text: 'Pipeline Value',                                verify: "Total estimated value of today's appointments displayed and accurate." },
+      { id: '19.2', text: 'Funnel visualization',                          verify: "Conversion stages (leads -> qualified -> booked -> won) with accurate counts." },
+      { id: '19.3', text: 'Hot Zones and SectorDossier drill-down',        verify: "Top ZIPs shown. Click ZIP opens SectorDossier." },
+      { id: '19.4', text: 'Efficiency Matrix and OperatorDossier drill-down', verify: "Operators listed by efficiency. Click opens OperatorDossier." },
+    ]
+  },
+  {
+    id: 'sec20',
+    title: 'SEC 20: EDGE CASES (USER BEHAVIOR)',
+    directions: `20.1 Sold Out Slot: Via SQL, fully book the first available slot for a test operator (INSERT into operator_appointment_slots with status='booked' or UPDATE slots count to max). Call in, press 1 for SMS. Verify the SMS offers slots starting from the SECOND slot -- the fully-booked slot must not appear. Cross-check: SELECT * FROM operator_appointment_slots ORDER BY start_at LIMIT 5.
+
+20.2 Zero Inventory: SET ALL slots for the next 7 days to blocked/booked for all operators: UPDATE operator_appointment_slots SET status='blocked' WHERE start_at BETWEEN NOW() AND NOW() + interval '7 days'. Call in, press 1 for SMS. Verify: system responds with a "fully booked, we will call you" message. No crash, no error log in Supabase Functions logs.
+
+20.3 The Ghost / Abandonment: Book a slot by replying "1" to the SMS. Then do NOT reply with an address. Wait (or manually set the DB timestamp). Verify: after 24h, the appointment still exists with address=NULL and the slot is still held. NOTE: This is a known gap -- V2 TODO is auto-release of slots with no address after 24h. Document the behavior, do not mark FAIL unless the slot is incorrectly released.
+
+20.4 Talkative User / Regex: After receiving the SMS slot list, reply with "I'll take number 1 thanks" (instead of bare "1"). Verify: WF-04 SMS handler either (a) extracts the digit "1" via regex and books correctly, OR (b) routes to human review queue. Either outcome is acceptable -- a crash or silent failure is not.
+
+20.5 Double Tap / Idempotency: Reply "1" to book. Wait 2 seconds. Reply "1" again from the same phone. Verify: only one appointment is created (SELECT COUNT(*) FROM appointments WHERE lead_id = '<id>' should be 1). Second reply should receive an "Already scheduled" or similar SMS, NOT a double-booking.
+
+20.6 Special Characters in Address: After booking (reply "1"), reply with an address containing apostrophes/accents: e.g. "123 O'Brien St, San José, CA 95112". Verify: no SQL error, address stored correctly in appointments.address, ZIP 95112 extracted correctly in AlertFeed.
+
+20.7 Rapid-Fire Calls (Dedup): Call the Twilio number 3 times within 60 seconds from the same phone. Verify: only 1 lead record created -- SELECT COUNT(*) FROM leads WHERE phone = '<test_phone>' should be 1. The deduplication window should absorb the extra calls.
+
+20.8 Business Hours Boundary: Set business hours close time to exactly 1 minute from now (in BiosScreen > SCHEDULE or directly via DB). Call in. Verify: system routes correctly -- if the call arrives after close, after-hours greeting plays; if before close, normal IVR plays. No mid-IVR hang or crash at the boundary.
+
+20.9 Empty Voicemail: Call and reach the voicemail prompt. Immediately hang up without speaking. Verify: system handles the empty/zero-length recording gracefully -- no crash in Function logs, callback_tasks record created (possibly with null/empty transcription field), no unhandled exception.
+
+20.10 Concurrent SMS Race (Last Slot): Using two different phones (or two simultaneous API calls via WF-90 Chaos Monkey), both reply "1" to the same SMS blast when only one slot remains. Verify: exactly one booking succeeds, the other receives an error/full SMS. SELECT COUNT(*) FROM appointments WHERE slot_id = '<last_slot_id>' should be 1.`,
+    tests: [
+      { id: '20.1',  text: 'Sold out slot -- first slot skipped in SMS',        verify: "SMS offers slots starting from second available. Fully-booked slot invisible." },
+      { id: '20.2',  text: 'Zero inventory -- graceful fallback',                verify: "System says fully booked, will call back. No crash, no error log." },
+      { id: '20.3',  text: 'Ghost / abandonment -- slot held with NULL address', verify: "Appointment exists with address=NULL after 24h. Slot not auto-released (known gap, document behavior)." },
+      { id: '20.4',  text: 'Talkative user -- regex digit extraction',           verify: "Reply 'I'll take number 1 thanks' books correctly OR routes to human review. No crash." },
+      { id: '20.5',  text: 'Double tap -- idempotency on duplicate reply',       verify: "Second '1' reply gets 'Already scheduled'. Only 1 appointment in DB." },
+      { id: '20.6',  text: 'Special characters in address -- no SQL injection',  verify: "Address with apostrophes/accents stored correctly. ZIP parsed. No SQL error." },
+      { id: '20.7',  text: 'Rapid-fire calls -- deduplication',                  verify: "3 calls in 60s produce 1 lead record." },
+      { id: '20.8',  text: 'Business hours boundary -- correct routing',         verify: "Call at closing boundary routes to correct IVR path. No hang or crash." },
+      { id: '20.9',  text: 'Empty voicemail -- graceful empty recording',        verify: "Hang up at voicemail prompt. No crash. callback_tasks created with null/empty transcription." },
+      { id: '20.10', text: 'Concurrent SMS race -- last slot integrity',         verify: "Two simultaneous '1' replies to last slot: 1 books, 1 gets error SMS. DB count = 1." },
+    ]
+  },
+  {
+    id: 'sec21',
+    title: 'SEC 21: OPERATOR EDGE CASES',
+    directions: `21.1 Sick Day / Operator Block: Block an operator's availability via SQL: UPDATE operator_appointment_slots SET status='blocked' WHERE operator_id = '<target_operator_id>' AND start_at > NOW(). Alternatively call sre_block_operator() if available. Call in and go through the SMS flow. Verify: the blocked operator's slots do NOT appear in the SMS slot list. Cross-check get_available_slots() output.
+
+21.2 Lazy Operator / Inactive: Set an operator to inactive: UPDATE operators SET is_active = false WHERE id = '<target_operator_id>'. Call in and go through the SMS flow. Verify: the inactive operator's slots are excluded from get_available_slots() results. After test, restore: UPDATE operators SET is_active = true WHERE id = '<target_operator_id>'.
+
+21.3 Force Assignment / Take It: Create a test appointment (or use an existing unassigned one). Force-assign a specific operator via SQL: UPDATE appointments SET operator_id = '<target_operator_id>' WHERE id = '<appt_id>'. Alternatively, POST to the assignment endpoint with p_force_operator_id. Verify: the OperatorBoard reflects the assignment. appointments.operator_id = '<target_operator_id>' in DB.`,
+    tests: [
+      { id: '21.1', text: "Sick day -- blocked operator's slots excluded",  verify: "Blocked operator slots absent from SMS list and get_available_slots() output." },
+      { id: '21.2', text: 'Lazy operator -- inactive operator excluded',     verify: "is_active=false operator excluded from slot generation and SMS list." },
+      { id: '21.3', text: 'Force assignment -- take-it / p_force_operator_id', verify: "Force-assigned operator_id appears in appointments and OperatorBoard." },
+    ]
+  },
+  {
+    id: 'sec22',
+    title: 'SEC 22: DATA INTEGRITY',
+    directions: `22.1 Storm Surge / Inventory Explosion: Activate storm mode from StormDashboard (F4). Verify WF-11 Heartbeat triggers extended slot generation. Check: SELECT COUNT(*) FROM operator_appointment_slots WHERE start_at > NOW() AND start_at < NOW() + interval '3 days' -- count should be significantly higher than normal (3 days of extended hours). Deactivate storm mode after verification.
+
+22.2 Orphan Test / Partition Safety: Create a call event and its transcript: INSERT INTO call_events (...) then INSERT INTO transcripts (call_event_id, call_created_at, ...) VALUES (..., <same_created_at>, ...). Verify FK integrity across partitioned tables: SELECT t.call_created_at, c.created_at FROM transcripts t JOIN call_events c ON t.call_event_id = c.id WHERE t.call_event_id = '<test_id>'. transcripts.call_created_at must equal call_events.created_at exactly (partition key alignment).`,
+    tests: [
+      { id: '22.1', text: 'Storm surge -- inventory explosion on storm mode', verify: "WF-11 generates 3 days of extended-hours slots. operator_appointment_slots count spikes vs baseline." },
+      { id: '22.2', text: 'Orphan test -- partition key alignment on transcripts', verify: "transcripts.call_created_at = call_events.created_at. No FK/partition mismatch." },
+    ]
+  },
+];
+
+/* ============================================================
+ * STORAGE
+ * ============================================================ */
+const LS_KEY = 'roofsig-qa-v221';
 
 function loadState() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) { try { state = { ...state, ...JSON.parse(saved) }; } catch (e) {} }
-    applyState();
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch { return {}; }
 }
 
-function saveState() {
-    state.lastUpdated = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    updateTimestamp();
-    updateProgress();
+function saveState(state) {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+  document.getElementById('footer').textContent =
+    'LAST UPDATED: ' + new Date().toISOString();
 }
 
-function applyState() {
-    document.querySelectorAll('.scenario[data-id]').forEach(scenario => {
-        const id = scenario.dataset.id;
-        const data = state.scenarios[id] || {};
-        const checkbox = scenario.querySelector('.scenario-checkbox');
-        const textarea = scenario.querySelector('.notes-area textarea');
-        if (checkbox) checkbox.checked = data.checked || false;
-        if (textarea) textarea.value = data.notes || '';
-        scenario.classList.remove('completed', 'failed', 'skipped');
-        if (data.status === 'pass') scenario.classList.add('completed');
-        if (data.status === 'fail') scenario.classList.add('failed');
-        if (data.status === 'skip') scenario.classList.add('skipped');
-        scenario.querySelectorAll('.status-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.status === data.status);
-        });
-        const notesArea = scenario.querySelector('.notes-area');
-        const notesToggle = scenario.querySelector('.notes-toggle');
-        if (data.notes && notesArea) {
-            notesArea.classList.add('open');
-            if (notesToggle) notesToggle.textContent = '− notes';
-        }
+/* ============================================================
+ * RENDER
+ * ============================================================ */
+const STATES = ['pending', 'pass', 'skip'];
+const BADGE_TEXT = { pending: '[ ]', pass: '[P]', skip: '[-]' };
+
+function buildChecklist() {
+  const state = loadState();
+  const container = document.getElementById('checklist');
+  container.innerHTML = '';
+
+  SECTIONS.forEach(sec => {
+    const secOpen = state['_sec_' + sec.id] !== false; // default open
+
+    const secEl = document.createElement('div');
+    secEl.className = 'section';
+    secEl.dataset.secId = sec.id;
+
+    // count for section
+    const counts = { pass: 0, skip: 0, total: sec.tests.length };
+    sec.tests.forEach(t => {
+      const s = state[t.id] || 'pending';
+      if (s === 'pass') counts.pass++;
+      if (s === 'skip') counts.skip++;
     });
-    document.getElementById('tester-name').value = state.sessionNotes.tester || '';
-    document.getElementById('environment').value = state.sessionNotes.environment || '';
-    document.getElementById('blockers').value = state.sessionNotes.blockers || '';
-    document.getElementById('v2-backlog').value = state.sessionNotes.v2Backlog || '';
-    updateTimestamp();
-    updateProgress();
+
+    // header
+    const hdr = document.createElement('div');
+    hdr.className = 'section-header';
+    hdr.innerHTML = `<span class="sec-title">${sec.title}</span>
+      <div class="sec-right">
+        <span class="sec-progress" id="sp-${sec.id}">${counts.pass}/${counts.total} PASS${counts.skip > 0 ? ' · ' + counts.skip + ' SKIP' : ''}</span>
+        <span class="collapse-indicator" id="ci-${sec.id}">${secOpen ? '[v]' : '[>]'}</span>
+      </div>`;
+    hdr.addEventListener('click', () => toggleSection(sec.id));
+    secEl.appendChild(hdr);
+
+    // directions
+    const dir = document.createElement('div');
+    dir.className = 'directions-block' + (secOpen ? ' open' : '');
+    dir.id = 'dir-' + sec.id;
+    dir.innerHTML = `<div class="directions-label">▶ DIRECTIONS</div>${escapeHtml(sec.directions)}`;
+    secEl.appendChild(dir);
+
+    // rows
+    const rowsBlock = document.createElement('div');
+    rowsBlock.className = 'rows-block' + (secOpen ? ' open' : '');
+    rowsBlock.id = 'rows-' + sec.id;
+
+    sec.tests.forEach(t => {
+      const s = state[t.id] || 'pending';
+      const row = document.createElement('div');
+      row.className = 'test-row state-' + s;
+      row.dataset.testId = t.id;
+      row.innerHTML = `<span class="row-badge">${BADGE_TEXT[s]}</span><span class="row-id">${t.id}</span>
+        <div class="row-content">
+          <span class="row-text">${escapeHtml(t.text)}</span>
+          <span class="row-verify">${escapeHtml(t.verify)}</span>
+        </div>`;
+      row.addEventListener('click', () => cycleState(t.id, sec.id));
+      rowsBlock.appendChild(row);
+    });
+
+    secEl.appendChild(rowsBlock);
+    container.appendChild(secEl);
+  });
+
+  updateProgress();
 }
 
-function updateTimestamp() {
-    const el = document.getElementById('last-updated');
-    el.textContent = state.lastUpdated ? state.lastUpdated.replace('T', ' ').slice(0, 19) : 'null';
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toggleSection(secId) {
+  const state = loadState();
+  const isOpen = state['_sec_' + secId] !== false;
+  state['_sec_' + secId] = !isOpen;
+  saveState(state);
+
+  const dirEl   = document.getElementById('dir-' + secId);
+  const rowsEl  = document.getElementById('rows-' + secId);
+  const ciEl    = document.getElementById('ci-' + secId);
+  const nowOpen = !isOpen;
+
+  dirEl.classList.toggle('open', nowOpen);
+  rowsEl.classList.toggle('open', nowOpen);
+  ciEl.textContent = nowOpen ? '[v]' : '[>]';
+}
+
+function cycleState(testId, secId) {
+  const state = loadState();
+  const cur = state[testId] || 'pending';
+  const next = STATES[(STATES.indexOf(cur) + 1) % STATES.length];
+  state[testId] = next;
+  saveState(state);
+
+  // update row
+  const row = document.querySelector(`[data-test-id="${testId}"]`);
+  if (row) {
+    row.className = 'test-row state-' + next;
+    row.querySelector('.row-badge').textContent = BADGE_TEXT[next];
+  }
+
+  // update section counter
+  updateSectionProgress(secId, state);
+  updateProgress();
+}
+
+function updateSectionProgress(secId, state) {
+  const sec = SECTIONS.find(s => s.id === secId);
+  if (!sec) return;
+  let pass = 0, skip = 0;
+  sec.tests.forEach(t => {
+    const s = state[t.id] || 'pending';
+    if (s === 'pass') pass++;
+    if (s === 'skip') skip++;
+  });
+  const el = document.getElementById('sp-' + secId);
+  if (el) el.textContent = `${pass}/${sec.tests.length} PASS${skip > 0 ? ' · ' + skip + ' SKIP' : ''}`;
 }
 
 function updateProgress() {
-    const scenarios = document.querySelectorAll('.scenario[data-id]');
-    const total = scenarios.length;
-    let pass = 0, fail = 0, skip = 0, pending = 0;
-    scenarios.forEach(s => {
-        const data = state.scenarios[s.dataset.id] || {};
-        if (data.status === 'pass') pass++;
-        else if (data.status === 'fail') fail++;
-        else if (data.status === 'skip') skip++;
-        else pending++;
+  const state = loadState();
+  let total = 0, pass = 0;
+  SECTIONS.forEach(sec => {
+    sec.tests.forEach(t => {
+      total++;
+      if ((state[t.id] || 'pending') === 'pass') pass++;
     });
-    const completed = pass + fail + skip;
-    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-    document.getElementById('progress-pct').textContent = pct;
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('stat-pass').textContent = pass;
-    document.getElementById('stat-fail').textContent = fail;
-    document.getElementById('stat-skip').textContent = skip;
-    document.getElementById('stat-pending').textContent = pending;
-    document.getElementById('total-scenarios').textContent = total;
-    document.querySelectorAll('[data-section]').forEach(section => {
-        const sectionId = section.dataset.section;
-        const sectionScenarios = section.querySelectorAll('.scenario[data-id]');
-        let sectionComplete = 0;
-        sectionScenarios.forEach(s => { if (state.scenarios[s.dataset.id]?.status) sectionComplete++; });
-        const doneEl = document.querySelector(`[data-section-done="${sectionId}"]`);
-        const totalEl = document.querySelector(`[data-section-total="${sectionId}"]`);
-        if (doneEl) doneEl.textContent = sectionComplete;
-        if (totalEl) totalEl.textContent = sectionScenarios.length;
-    });
+  });
+  const pct = total > 0 ? Math.round(pass / total * 100) : 0;
+  document.getElementById('progress-label').textContent =
+    `PROGRESS: ${pass}/${total} (${pct}%)`;
+  document.getElementById('progress-bar').style.width = pct + '%';
 }
 
-document.getElementById('reset-btn').addEventListener('click', () => {
-    if (confirm('Reset all progress?')) {
-        state = { scenarios: {}, sessionNotes: { tester: '', environment: '', blockers: '', v2Backlog: '' }, lastUpdated: null };
-        saveState(); applyState();
-    }
+/* ============================================================
+ * RESET
+ * ============================================================ */
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (!confirm('RESET all test states to PENDING? This cannot be undone.')) return;
+  localStorage.removeItem(LS_KEY);
+  buildChecklist();
 });
 
-document.getElementById('export-btn').addEventListener('click', () => {
-    const scenarios = document.querySelectorAll('.scenario[data-id]');
-    let report = `# RoofSig QA Report\n# Generated: ${new Date().toISOString()}\n# Tester: ${state.sessionNotes.tester || 'N/A'}\n# Environment: ${state.sessionNotes.environment || 'N/A'}\n\n`;
-    let pass = 0, fail = 0, skip = 0;
-    scenarios.forEach(s => {
-        const data = state.scenarios[s.dataset.id] || {};
-        if (data.status === 'pass') pass++;
-        if (data.status === 'fail') fail++;
-        if (data.status === 'skip') skip++;
-    });
-    report += `## Summary\nPASS: ${pass} | FAIL: ${fail} | SKIP: ${skip} | TOTAL: ${scenarios.length}\n\n## Results\n\n`;
-    scenarios.forEach(scenario => {
-        const id = scenario.dataset.id;
-        const title = scenario.querySelector('.scenario-title').textContent;
-        const data = state.scenarios[id] || {};
-        report += `### ${title}\nstatus: ${(data.status || 'PENDING').toUpperCase()}\n`;
-        if (data.notes) report += `notes: ${data.notes}\n`;
-        report += `\n`;
-    });
-    if (state.sessionNotes.blockers) report += `## Blockers\n${state.sessionNotes.blockers}\n\n`;
-    if (state.sessionNotes.v2Backlog) report += `## V2 Backlog\n${state.sessionNotes.v2Backlog}\n`;
-    const blob = new Blob([report], { type: 'text/markdown' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `roofsig-qa-${new Date().toISOString().split('T')[0]}.md`;
-    a.click();
-});
+/* ============================================================
+ * INIT
+ * ============================================================ */
+buildChecklist();
 
-document.querySelectorAll('.scenario-checkbox').forEach(cb => {
-    cb.addEventListener('change', e => {
-        const id = e.target.dataset.id;
-        if (!state.scenarios[id]) state.scenarios[id] = {};
-        state.scenarios[id].checked = e.target.checked;
-        if (e.target.checked && !state.scenarios[id].status) state.scenarios[id].status = 'pass';
-        saveState(); applyState();
-    });
-});
-
-document.querySelectorAll('.status-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-        const scenario = e.target.closest('.scenario');
-        const id = scenario.dataset.id;
-        if (!state.scenarios[id]) state.scenarios[id] = {};
-        state.scenarios[id].status = e.target.dataset.status;
-        state.scenarios[id].checked = true;
-        saveState(); applyState();
-    });
-});
-
-document.querySelectorAll('.notes-toggle').forEach(toggle => {
-    toggle.addEventListener('click', e => {
-        const notesArea = e.target.nextElementSibling;
-        notesArea.classList.toggle('open');
-        e.target.textContent = notesArea.classList.contains('open') ? '− notes' : '+ notes';
-    });
-});
-
-document.querySelectorAll('.notes-area textarea').forEach(textarea => {
-    textarea.addEventListener('input', e => {
-        const id = e.target.closest('.scenario').dataset.id;
-        if (!state.scenarios[id]) state.scenarios[id] = {};
-        state.scenarios[id].notes = e.target.value;
-        saveState();
-    });
-});
-
-['tester-name', 'environment', 'blockers', 'v2-backlog'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', e => {
-        const key = { 'tester-name': 'tester', 'environment': 'environment', 'blockers': 'blockers', 'v2-backlog': 'v2Backlog' }[id];
-        state.sessionNotes[key] = e.target.value;
-        saveState();
-    });
-});
-
-loadState();
+// Set footer to last saved time if any
+(function() {
+  const raw = localStorage.getItem(LS_KEY);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed._lastSaved) {
+        document.getElementById('footer').textContent = 'LAST UPDATED: ' + parsed._lastSaved;
+      }
+    } catch {}
+  }
+})();
 </script>
 </body>
 </html>
